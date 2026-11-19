@@ -15,7 +15,11 @@
   - 리눅스마스터 1급: 준비 중
 - **상단 메뉴**: 정보보안기사 메뉴에 마우스를 올리면 주요 항목과 실습 메뉴를 바로 선택할 수 있습니다.
 - **실습**
-  - 터미널 실습: 실습용 컨테이너를 생성해 브라우저에서 쉘을 사용하고, eBPF 모니터링 로그를 실시간으로 확인합니다.
+  - 터미널 실습: 실습용 컨테이너를 생성해 브라우저에서 쉘을 사용합니다.
+    - 세션은 10분 동안 유지되며, "세션 갱신" 버튼으로 다시 10분으로 연장합니다. 만료 1분 전에 터미널에 안내가 표시됩니다.
+    - PIP 모드: 아이콘을 누르면 메인 페이지로 이동하고 터미널만 작은 창으로 띄웁니다. 창은 이동·크기 조절할 수 있고, 다른 페이지로 이동해도 실습이 유지됩니다. 창 위쪽 막대에 원래 화면으로 / 세션 갱신 / 남은 시간, 맨 오른쪽에 종료(×) 버튼이 있으며 종료하면 실습도 끝납니다.
+    - 실습이 끝난 뒤 페이지를 나갔다 다시 들어오면 터미널 화면이 초기화됩니다.
+    - eBPF 모니터링 로그 패널은 현재 비활성화되어 있습니다 (`src/pages/TerminalLabPage.jsx` 주석 참고).
   - Wireshark 패킷 분석: 준비 중
 
 ## 기술 스택
@@ -82,7 +86,15 @@ src/
 │   └── curriculum.js         # 자격증, 주요 항목, 실습 목록 정의
 ├── components/
 │   ├── Header.jsx            # 상단 메뉴와 드롭다운
-│   └── Header.css
+│   ├── Header.css
+│   └── EbpfLogPanel.jsx      # eBPF 모니터링 로그 패널 (현재 미사용)
+├── lab/
+│   ├── TerminalSessionProvider.jsx  # 터미널 실습 세션 (xterm, WebSocket, 세션 시간, PIP 상태)
+│   ├── terminalSession.js    # 세션 컨텍스트와 useTerminalSession 훅
+│   ├── TerminalView.jsx      # xterm 을 붙여서 보여주는 자리 (페이지 / PIP)
+│   ├── TerminalPip.jsx       # PIP 창 (이동, 크기 조절, 갱신·종료 버튼)
+│   ├── SessionTimer.jsx      # 남은 세션 시간 표시
+│   └── TerminalLab.css
 └── pages/
     ├── HomePage.jsx          # 메인 페이지
     ├── TopicPage.jsx         # 정보보안기사 항목 페이지
@@ -109,12 +121,15 @@ src/
 | 종류 | 엔드포인트 | 설명 |
 |---|---|---|
 | WebSocket | `/ws/terminal?labId={labId}` | 실습 컨테이너의 쉘 입출력 |
-| SSE | `/api/logs?labId={labId}` | 해당 실습의 eBPF 모니터링 로그 스트림 |
+| SSE | `/api/logs?labId={labId}` | 해당 실습의 eBPF 모니터링 로그 스트림 (현재 미사용) |
 
 - `labId` 는 실습을 시작할 때 클라이언트에서 UUID로 생성합니다.
-- SSE 연결이 열린 뒤 같은 `labId` 로 WebSocket을 연결합니다. SSE 연결에 실패해도 터미널 실습은 진행합니다.
-- WebSocket으로 보내는 메시지는 JSON입니다: 입력 `{"type":"input","data":"..."}`, 터미널 크기 `{"type":"resize","cols":120,"rows":30}`. 연결 직후와 화면 크기가 바뀔 때 `resize` 를 보내 컨테이너 TTY 크기를 맞춥니다.
-- WebSocket 연결이 종료되면 SSE 연결도 함께 종료됩니다. 실습 페이지를 벗어나도 연결이 종료됩니다.
+- WebSocket 메시지는 양방향 모두 JSON입니다.
+  - 보내는 메시지: 입력 `{"type":"input","data":"..."}`, 터미널 크기 `{"type":"resize","cols":120,"rows":30}`, 세션 갱신 `{"type":"renew"}`
+  - 받는 메시지: 쉘 출력 `{"type":"output","data":"..."}`, 남은 세션 시간 `{"type":"session","remainingSeconds":600}`
+- 연결 직후와 터미널 크기가 바뀔 때(창 크기, PIP 크기 조절) `resize` 를 보내 컨테이너 TTY 크기를 맞춥니다.
+- PIP 모드가 아닌 상태로 실습 페이지를 벗어나면 실습이 종료됩니다. PIP 모드에서는 다른 페이지로 이동해도 유지됩니다.
+- eBPF 로그 패널을 다시 쓸 때는 SSE가 열린 뒤 WebSocket을 연결해야 초기 로그가 유실되지 않습니다 (`startLab({ deferConnect: true })`).
 
 ## 배포 시 참고
 

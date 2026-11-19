@@ -1,0 +1,222 @@
+/* ---- 터미널 실습 페이지 ---- */
+
+.terminal-lab {
+  flex: 1;
+  padding: 20px 16px;
+  background: #121212;
+  color: #fff;
+}
+
+.terminal-lab__toolbar {
+  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.terminal-lab__back {
+  color: #888;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.terminal-lab__title {
+  margin: 0 12px 0 4px;
+  font-size: 18px;
+}
+
+.terminal-lab__btn {
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.terminal-lab__btn:disabled {
+  cursor: not-allowed;
+}
+
+/* 세션 시간 / PIP / 세션 갱신: 줄의 오른쪽 끝 */
+.terminal-lab__session {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.terminal-lab__timer {
+  font: 13px var(--mono);
+  color: #aaa;
+  white-space: nowrap;
+}
+
+.terminal-lab__timer.is-expiring,
+.terminal-pip__timer.is-expiring {
+  color: #ffb347;
+}
+
+.terminal-lab__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 34px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.terminal-lab__frame {
+  height: clamp(320px, calc(100svh - 190px), 720px);
+  border: 1px solid #333;
+  background: #000;
+}
+
+.terminal-lab__screen {
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  text-align: left;
+}
+
+.terminal-lab__pip-placeholder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #888;
+  font-size: 14px;
+}
+
+/* xterm 이 들어 있는 div (페이지와 PIP 사이를 옮겨 다닌다) */
+.terminal-host {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- PIP 창 ---- */
+
+.terminal-pip {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.terminal-pip__bar {
+  flex: none;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px 0 12px;
+  background: #1e1e1e;
+  border-bottom: 1px solid #333;
+  cursor: move;
+  touch-action: none;
+  user-select: none;
+}
+
+.terminal-pip__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #2a2a2a;
+  color: #ddd;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.terminal-pip__btn:hover:not(:disabled) {
+  background: #3a3a3a;
+}
+
+.terminal-pip__btn:disabled {
+  color: #777;
+  cursor: not-allowed;
+}
+
+.terminal-pip__timer {
+  font: 12px var(--mono);
+  color: #aaa;
+  white-space: nowrap;
+}
+
+/* 줄의 맨 오른쪽 */
+.terminal-pip__close {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #bbb;
+  cursor: pointer;
+}
+
+.terminal-pip__close:hover {
+  background: #c42b1c;
+  color: #fff;
+}
+
+.terminal-pip__body {
+  flex: 1;
+  min-height: 0;
+  padding: 4px;
+  text-align: left;
+}
+
+/* 크기 조절 손잡이 */
+.terminal-pip__resize {
+  position: absolute;
+  z-index: 1;
+  touch-action: none;
+}
+
+.terminal-pip__resize--n,
+.terminal-pip__resize--s {
+  left: 12px;
+  right: 12px;
+  height: 4px;
+  cursor: ns-resize;
+}
+
+.terminal-pip__resize--n { top: 0; }
+.terminal-pip__resize--s { bottom: 0; }
+
+.terminal-pip__resize--e,
+.terminal-pip__resize--w {
+  top: 12px;
+  bottom: 12px;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.terminal-pip__resize--e { right: 0; }
+.terminal-pip__resize--w { left: 0; }
+
+.terminal-pip__resize--ne,
+.terminal-pip__resize--nw,
+.terminal-pip__resize--se,
+.terminal-pip__resize--sw {
+  width: 10px;
+  height: 10px;
+}
+
+.terminal-pip__resize--ne { top: 0; right: 0; cursor: nesw-resize; }
+.terminal-pip__resize--sw { bottom: 0; left: 0; cursor: nesw-resize; }
+.terminal-pip__resize--nw { top: 0; left: 0; cursor: nwse-resize; }
+.terminal-pip__resize--se { bottom: 0; right: 0; cursor: nwse-resize; }

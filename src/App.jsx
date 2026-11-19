@@ -7,15 +7,19 @@ import LabHubPage from './pages/LabHubPage.jsx';
 import TerminalLabPage from './pages/TerminalLabPage.jsx';
 import WiresharkLabPage from './pages/WiresharkLabPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
+import TerminalSessionProvider from './lab/TerminalSessionProvider.jsx';
+import TerminalPip from './lab/TerminalPip.jsx';
 
+// 터미널 실습 세션은 PIP 모드에서 페이지를 이동해도 유지되도록 레이아웃에서 관리한다
 function Layout() {
   return (
-    <>
+    <TerminalSessionProvider>
       <Header />
       <main className="site-main">
         <Outlet />
       </main>
-    </>
+      <TerminalPip />
+    </TerminalSessionProvider>
   );
 }
 
