@@ -25,6 +25,12 @@ function createLabId() {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
+function sendMessage(ws, message) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(message));
+  }
+}
+
 function TerminalLabPage() {
   const terminalRef = useRef(null);
   const termInstance = useRef(null);
@@ -57,10 +63,13 @@ function TerminalLabPage() {
 
     termInstance.current = term;
 
+    // 백엔드로 보내는 메시지는 JSON: {type:'input', data} / {type:'resize', cols, rows}
     const dataDisposable = term.onData((data) => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        wsRef.current.send(data);
-      }
+      sendMessage(wsRef.current, { type: 'input', data });
+    });
+    // fitAddon.fit() 으로 크기가 바뀌면 컨테이너 TTY 크기도 맞춘다
+    const resizeDisposable = term.onResize(({ cols, rows }) => {
+      sendMessage(wsRef.current, { type: 'resize', cols, rows });
     });
 
     const handleResize = () => fitAddon.fit();
@@ -76,6 +85,7 @@ function TerminalLabPage() {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       dataDisposable.dispose();
+      resizeDisposable.dispose();
 
       // ref 를 먼저 비워서, 닫힐 때 발생하는 이벤트 핸들러가 dispose 된 터미널을 건드리지 않게 함
       // (다른 페이지로 이동하면 실습 연결도 함께 종료됨)
@@ -128,12 +138,22 @@ function TerminalLabPage() {
     setLogStatus('connecting');
 
     // 1. eBPF 로그 SSE 연결
+    //    백엔드는 WebSocket 이 연결될 때 로그 스트리밍을 시작하므로, SSE 구독이 열린 뒤에
+    //    WebSocket 을 연결해야 초기 로그가 버려지지 않는다.
     const es = new EventSource(`${API_BASE_URL}/api/logs?labId=${encodeURIComponent(labId)}`);
     eventSourceRef.current = es;
+
+    let terminalStarted = false;
+    const connectTerminalOnce = () => {
+      if (terminalStarted) return;
+      terminalStarted = true;
+      connectTerminal();
+    };
 
     es.onopen = () => {
       if (eventSourceRef.current !== es) return;
       setLogStatus('open');
+      connectTerminalOnce();
     };
 
     es.onmessage = (event) => {
@@ -152,66 +172,84 @@ function TerminalLabPage() {
         // EventSource 가 자동 재연결을 시도하는 중
         setLogStatus('reconnecting');
       }
+      // 모니터링 로그 연결에 실패해도 터미널 실습은 진행한다
+      // (백엔드가 꺼져 있으면 WebSocket 쪽에서 연결 실패로 정리됨)
+      connectTerminalOnce();
     };
 
     // 2. 터미널 WebSocket 연결
-    const ws = new WebSocket(`${WS_BASE_URL}/ws/terminal?labId=${encodeURIComponent(labId)}`);
-    wsRef.current = ws;
+    function connectTerminal() {
+      const ws = new WebSocket(`${WS_BASE_URL}/ws/terminal?labId=${encodeURIComponent(labId)}`);
+      wsRef.current = ws;
 
-    let opened = false;
-    let stoppedByUser = false;
-    ws.stopByUser = () => {
-      stoppedByUser = true;
-      ws.close();
-    };
+      let opened = false;
+      let stoppedByUser = false;
+      ws.stopByUser = () => {
+        stoppedByUser = true;
+        ws.close();
+      };
 
-    ws.onopen = () => {
-      if (wsRef.current !== ws) return;
-      opened = true;
-      setStatus('connected');
-      term.clear();
-      ws.send('\n');
-    };
+      ws.onopen = () => {
+        if (wsRef.current !== ws) return;
+        opened = true;
+        setStatus('connected');
+        term.clear();
+        // 컨테이너 TTY 크기를 화면에 맞춘 뒤 프롬프트를 띄운다
+        sendMessage(ws, { type: 'resize', cols: term.cols, rows: term.rows });
+        sendMessage(ws, { type: 'input', data: '\n' });
+      };
 
-    ws.onmessage = (event) => {
-      if (wsRef.current !== ws) return;
-      term.write(event.data);
-    };
+      ws.onmessage = (event) => {
+        if (wsRef.current !== ws) return;
+        term.write(event.data);
+      };
 
-    ws.onerror = () => {
-      if (wsRef.current !== ws) return;
-      term.writeln('\r\n--- 연결 오류 발생 ---');
-      // 상태 정리는 항상 뒤따라 오는 onclose 에서 처리
-    };
+      ws.onerror = () => {
+        if (wsRef.current !== ws) return;
+        term.writeln('\r\n--- 연결 오류 발생 ---');
+        // 상태 정리는 항상 뒤따라 오는 onclose 에서 처리
+      };
 
-    ws.onclose = (event) => {
-      // 이미 다른 세션으로 교체됐거나 언마운트된 경우 무시
-      if (wsRef.current !== ws) return;
+      ws.onclose = (event) => {
+        // 이미 다른 세션으로 교체됐거나 언마운트된 경우 무시
+        if (wsRef.current !== ws) return;
 
-      if (!opened) {
-        term.writeln('\r\n--- 터미널 서버에 연결하지 못했습니다 ---');
-      } else if (stoppedByUser) {
-        term.writeln('\r\n--- 실습을 종료했습니다 ---');
-      } else {
-        const reason = event.reason ? ` (${event.reason})` : '';
-        term.writeln(`\r\n--- 서버와의 연결이 끊어졌습니다${reason} ---`);
-      }
+        if (!opened) {
+          term.writeln('\r\n--- 터미널 서버에 연결하지 못했습니다 ---');
+        } else if (stoppedByUser) {
+          term.writeln('\r\n--- 실습을 종료했습니다 ---');
+        } else {
+          const reason = event.reason ? ` (${event.reason})` : '';
+          term.writeln(`\r\n--- 서버와의 연결이 끊어졌습니다${reason} ---`);
+        }
 
-      wsRef.current = null;
-      if (eventSourceRef.current === es) {
-        es.close();
-        eventSourceRef.current = null;
-      }
-      setLogStatus('idle');
-      setStatus('disconnected');
-    };
+        wsRef.current = null;
+        if (eventSourceRef.current === es) {
+          es.close();
+          eventSourceRef.current = null;
+        }
+        setLogStatus('idle');
+        setStatus('disconnected');
+      };
+    }
   };
 
   const stopLab = () => {
     const ws = wsRef.current;
-    if (!ws) return;
-    // onclose 에서 SSE 정리와 상태 변경까지 처리됨
-    ws.stopByUser();
+    if (ws) {
+      // onclose 에서 SSE 정리와 상태 변경까지 처리됨
+      ws.stopByUser();
+      return;
+    }
+    // 아직 SSE 연결을 기다리는 중이면 (WebSocket 연결 전) SSE 만 닫는다
+    const es = eventSourceRef.current;
+    if (es) {
+      eventSourceRef.current = null;
+      es.close();
+      termInstance.current?.writeln('\r\n--- 실습을 종료했습니다 ---');
+      setLogStatus('idle');
+      setStatus('disconnected');
+    }
   };
 
   const logStatusLabel = {

@@ -112,6 +112,8 @@ src/
 | SSE | `/api/logs?labId={labId}` | 해당 실습의 eBPF 모니터링 로그 스트림 |
 
 - `labId` 는 실습을 시작할 때 클라이언트에서 UUID로 생성합니다.
+- SSE 연결이 열린 뒤 같은 `labId` 로 WebSocket을 연결합니다. SSE 연결에 실패해도 터미널 실습은 진행합니다.
+- WebSocket으로 보내는 메시지는 JSON입니다: 입력 `{"type":"input","data":"..."}`, 터미널 크기 `{"type":"resize","cols":120,"rows":30}`. 연결 직후와 화면 크기가 바뀔 때 `resize` 를 보내 컨테이너 TTY 크기를 맞춥니다.
 - WebSocket 연결이 종료되면 SSE 연결도 함께 종료됩니다. 실습 페이지를 벗어나도 연결이 종료됩니다.
 
 ## 배포 시 참고
