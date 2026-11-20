@@ -4,10 +4,7 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
 import { TerminalSessionContext, terminalLabPath } from './terminalSession.js';
-
-// 백엔드 주소: .env.local 등에 VITE_API_BASE_URL 로 지정 (기본값 localhost:8080)
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080').replace(/\/$/, '');
-const WS_BASE_URL = API_BASE_URL.replace(/^http/, 'ws');
+import { WS_BASE_URL } from '../config.js';
 
 // 세션 만료 이 시간 전에 터미널에 안내를 띄운다
 const EXPIRY_WARNING_MS = 60_000;
@@ -32,10 +29,34 @@ function sendMessage(ws, message) {
   }
 }
 
+// 클립보드 API 는 보안 컨텍스트(HTTPS, localhost)에서만 쓸 수 있고, 읽기는 브라우저가 처음 한 번 허용을 묻는다.
+async function handleRightClick(term) {
+  const clipboard = navigator.clipboard;
+  const selection = term.getSelection();
+  try {
+    if (selection) {
+      await clipboard.writeText(selection);
+      term.clearSelection();
+    } else {
+      const text = await clipboard.readText();
+      // paste() 는 줄바꿈을 \r 로 바꾸고 bracketed paste 를 처리한 뒤 onData 로 보낸다
+      if (text) term.paste(text);
+    }
+    term.focus();
+  } catch (e) {
+    console.warn('터미널 클립보드 사용 실패 (브라우저 클립보드 권한 확인)', e);
+    term.writeln('\r\n\x1b[33m[알림] 클립보드를 사용할 수 없습니다. 브라우저 주소창의 클립보드 권한을 허용하거나 Ctrl+V 를 사용하세요.\x1b[0m');
+  }
+}
+
 /**
  * 터미널 실습 세션을 앱 전체에서 관리한다.
  * xterm 인스턴스는 하나만 만들고, 실습 페이지 / PIP 창 중 보이는 곳(TerminalView)으로 DOM 을 옮겨 붙인다.
- * 그래서 PIP 모드에서는 다른 페이지로 이동해도 실습이 유지된다.
+ *
+ * PIP 는 따로 켜고 끄지 않고 상태에서 계산한다:
+ *   실습 페이지(/lab/terminal)가 아닌 곳에서, 실습이 진행 중(또는 시작 대기 중)이면 PIP 로 보인다.
+ * 그래서 실습 중에 다른 페이지로 이동하면 자동으로 PIP 가 되고, 실습 페이지로 돌아오면 페이지에 다시 붙는다.
+ * PIP 에서 실습이 끝나면(만료, exit) 안내를 볼 수 있게 PIP 를 남겨 두고, 사용자가 닫으면 사라진다.
  */
 function TerminalSessionProvider({ children }) {
   const navigate = useNavigate();
@@ -46,11 +67,21 @@ function TerminalSessionProvider({ children }) {
   const fitRef = useRef(null);
   const wsRef = useRef(null);
   const labIdRef = useRef(null);
+  const pendingStartRef = useRef(null); // xterm 이 아직 없을 때 요청된 startLab 옵션
+  const pathnameRef = useRef(location.pathname);
 
   const [status, setStatus] = useState('disconnected'); // disconnected | connecting | connected
   const [labId, setLabId] = useState(null);
   const [expiresAt, setExpiresAt] = useState(null); // 세션 만료 시각 (ms)
-  const [pip, setPip] = useState(false);
+  const [startPending, setStartPending] = useState(false); // xterm 이 붙기를 기다리는 실습 시작 요청
+  const [lingering, setLingering] = useState(false); // PIP 에서 실습이 끝났지만 아직 닫지 않음
+
+  const onLabPage = location.pathname === terminalLabPath;
+  const pip = !onLabPage && (labId !== null || startPending || lingering);
+
+  useEffect(() => {
+    pathnameRef.current = location.pathname;
+  }, [location.pathname]);
 
   const getHost = useCallback(() => {
     if (!hostRef.current) {
@@ -68,47 +99,6 @@ function TerminalSessionProvider({ children }) {
       fitRef.current.fit();
     } catch {
       // 화면에 붙어 있지 않은 순간에는 크기를 계산하지 못할 수 있음
-    }
-  }, []);
-
-  // 터미널을 보여줄 자리(slot)에 xterm 을 붙인다. 처음 붙을 때 xterm 을 만든다.
-  const attachTerminal = useCallback(
-    (slot) => {
-      const host = getHost();
-      slot.appendChild(host);
-
-      if (!termRef.current) {
-        const term = new Terminal({
-          cursorBlink: true,
-          cursorStyle: 'block',
-          fontSize: 14,
-          fontFamily: 'Consolas, "Courier New", monospace',
-          theme: {
-            background: '#000000',
-            foreground: '#d4d4d4',
-            cursor: '#00ff00',
-          },
-        });
-        const fitAddon = new FitAddon();
-        term.loadAddon(fitAddon);
-        term.open(host);
-        term.onData((data) => sendMessage(wsRef.current, { type: 'input', data }));
-        // 크기가 바뀌면 컨테이너 TTY 크기도 맞춘다
-        term.onResize(({ cols, rows }) => sendMessage(wsRef.current, { type: 'resize', cols, rows }));
-        termRef.current = term;
-        fitRef.current = fitAddon;
-      }
-
-      fitTerminal();
-      termRef.current.focus();
-    },
-    [getHost, fitTerminal],
-  );
-
-  const detachTerminal = useCallback((slot) => {
-    const host = hostRef.current;
-    if (host && host.parentNode === slot) {
-      slot.removeChild(host);
     }
   }, []);
 
@@ -184,6 +174,10 @@ function TerminalSessionProvider({ children }) {
         term.writeln(`\r\n--- 서버와의 연결이 끊어졌습니다${reason} ---`);
       }
 
+      // PIP 로 보던 중 서버 쪽에서 끝났으면(만료, exit 등) 안내를 볼 수 있게 PIP 를 남긴다
+      if (!stoppedByUser && pathnameRef.current !== terminalLabPath) {
+        setLingering(true);
+      }
       wsRef.current = null;
       labIdRef.current = null;
       setLabId(null);
@@ -193,21 +187,30 @@ function TerminalSessionProvider({ children }) {
   }, []);
 
   /**
-   * 실습을 시작한다.
+   * 실습을 시작한다. 진행 중이면 아무것도 하지 않는다.
+   * xterm 이 아직 화면에 붙지 않았으면(예: Wireshark 페이지에서 바로 시작) PIP 를 띄워 붙은 뒤에 시작한다.
    * deferConnect: true 이면 WebSocket 을 바로 연결하지 않는다. eBPF 로그 패널(EbpfLogPanel)을 쓸 때
    * SSE 구독이 열린 뒤 onReady 에서 connectTerminal(labId) 을 호출하기 위한 옵션 (초기 로그 유실 방지).
    */
   const startLab = useCallback(
-    ({ deferConnect = false } = {}) => {
+    (options = {}) => {
+      const { deferConnect = false } = options;
+      if (labIdRef.current) return;
       const term = termRef.current;
-      if (!term || labIdRef.current) return;
+      if (!term) {
+        pendingStartRef.current = { deferConnect };
+        setStartPending(true);
+        return;
+      }
 
       const id = createLabId();
       labIdRef.current = id;
-      term.clear();
+      term.reset();
       term.writeln('실습 컨테이너 생성 중...');
       setLabId(id);
       setStatus('connecting');
+      setStartPending(false);
+      setLingering(false);
 
       if (!deferConnect) {
         connectTerminal(id);
@@ -216,7 +219,63 @@ function TerminalSessionProvider({ children }) {
     [connectTerminal],
   );
 
+  // 터미널을 보여줄 자리(slot)에 xterm 을 붙인다. 처음 붙을 때 xterm 을 만든다.
+  const attachTerminal = useCallback(
+    (slot) => {
+      const host = getHost();
+      slot.appendChild(host);
+
+      if (!termRef.current) {
+        const term = new Terminal({
+          cursorBlink: true,
+          cursorStyle: 'block',
+          fontSize: 14,
+          fontFamily: 'Consolas, "Courier New", monospace',
+          theme: {
+            background: '#000000',
+            foreground: '#d4d4d4',
+            cursor: '#00ff00',
+          },
+        });
+        const fitAddon = new FitAddon();
+        term.loadAddon(fitAddon);
+        term.open(host);
+        term.onData((data) => sendMessage(wsRef.current, { type: 'input', data }));
+        // 크기가 바뀌면 컨테이너 TTY 크기도 맞춘다
+        term.onResize(({ cols, rows }) => sendMessage(wsRef.current, { type: 'resize', cols, rows }));
+        // 우클릭: 선택한 글자가 있으면 복사, 없으면 붙여넣기 (Windows Terminal·PuTTY 와 같은 방식).
+        // host 는 페이지와 PIP 사이를 옮겨 다니므로 여기에 한 번만 건다.
+        host.addEventListener('contextmenu', (event) => {
+          event.preventDefault();
+          handleRightClick(term);
+        });
+        termRef.current = term;
+        fitRef.current = fitAddon;
+      }
+
+      fitTerminal();
+      termRef.current.focus();
+
+      // xterm 이 없어서 미뤄 둔 실습 시작
+      const pending = pendingStartRef.current;
+      if (pending) {
+        pendingStartRef.current = null;
+        startLab(pending);
+      }
+    },
+    [getHost, fitTerminal, startLab],
+  );
+
+  const detachTerminal = useCallback((slot) => {
+    const host = hostRef.current;
+    if (host && host.parentNode === slot) {
+      slot.removeChild(host);
+    }
+  }, []);
+
   const stopLab = useCallback(() => {
+    pendingStartRef.current = null;
+    setStartPending(false);
     const ws = wsRef.current;
     if (ws) {
       // onclose 에서 상태 정리까지 처리됨
@@ -243,51 +302,31 @@ function TerminalSessionProvider({ children }) {
     if (delay <= 0) return;
     const timer = setTimeout(() => {
       termRef.current?.writeln(
-        '\r\n\x1b[33m[알림] 1분 후 세션이 만료됩니다. 실습 페이지의 "세션 갱신" 버튼으로 연장할 수 있습니다.\x1b[0m',
+        '\r\n\x1b[33m[알림] 1분 후 세션이 만료됩니다. "세션 갱신" 버튼으로 연장할 수 있습니다.\x1b[0m',
       );
     }, delay);
     return () => clearTimeout(timer);
   }, [expiresAt]);
 
-  // PIP 로 전환하면 메인 페이지로 이동한다 (PIP 창에서 실습을 이어감)
-  const enterPip = useCallback(() => {
-    setPip(true);
-    navigate('/');
+  // 실습 페이지 밖으로 이동한다 (실습 중이면 자동으로 PIP 가 된다).
+  // onClick 에 바로 넘기면 이벤트 객체가 들어오므로 문자열일 때만 경로로 쓴다.
+  const enterPip = useCallback(
+    (path) => {
+      navigate(typeof path === 'string' ? path : '/');
+    },
+    [navigate],
+  );
+
+  // PIP 창의 "원래 화면으로": 실습 페이지로 돌아가면 터미널이 페이지에 다시 붙는다
+  const exitPip = useCallback(() => {
+    navigate(terminalLabPath);
   }, [navigate]);
 
   // PIP 창의 종료 버튼: 실습을 끝내고 PIP 를 닫는다
   const closePip = useCallback(() => {
     stopLab();
-    setPip(false);
+    setLingering(false);
   }, [stopLab]);
-
-  // 다른 페이지에서 PIP 를 닫으면 실습 페이지로 이동한 뒤 PIP 를 해제한다
-  // (먼저 해제하면 아래 effect 가 "PIP 아닌 상태로 실습 페이지 밖"으로 보고 실습을 종료함)
-  const pendingPipExitRef = useRef(false);
-  const exitPip = useCallback(() => {
-    if (location.pathname === terminalLabPath) {
-      setPip(false);
-    } else {
-      pendingPipExitRef.current = true;
-      navigate(terminalLabPath);
-    }
-  }, [location.pathname, navigate]);
-
-  useEffect(() => {
-    if (location.pathname === terminalLabPath) {
-      if (pendingPipExitRef.current) {
-        pendingPipExitRef.current = false;
-        setPip(false);
-      }
-      // 실습이 끝난 뒤 다시 들어오면 이전 실습 화면을 지운다 (진행 중인 실습은 그대로)
-      if (!labIdRef.current) {
-        termRef.current?.reset();
-      }
-    } else if (!pip) {
-      // PIP 가 아닌 상태로 실습 페이지를 벗어나면 실습을 종료한다 (PIP 모드에서는 다른 페이지에서도 유지)
-      stopLab();
-    }
-  }, [location.pathname, pip, stopLab]);
 
   const value = useMemo(
     () => ({

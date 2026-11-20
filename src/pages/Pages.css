@@ -249,3 +249,46 @@ a.placeholder-card:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- 웹 취약점 실습 ---------- */
+.vuln-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.vuln-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.vuln-group {
+  margin-bottom: 28px;
+}
+
+.vuln-group h2 {
+  margin: 0 0 12px;
+  color: var(--text-strong);
+  font-size: 18px;
+}
+
+.vuln-group__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vuln-group__item strong {
+  color: var(--text-strong);
+}
+
+.vuln-group__item span {
+  font-size: 13px;
+}

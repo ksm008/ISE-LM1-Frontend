@@ -6,6 +6,8 @@ import LinuxMasterPage from './pages/LinuxMasterPage.jsx';
 import LabHubPage from './pages/LabHubPage.jsx';
 import TerminalLabPage from './pages/TerminalLabPage.jsx';
 import WiresharkLabPage from './pages/WiresharkLabPage.jsx';
+import VulnLabPage from './pages/VulnLabPage.jsx';
+import VulnCategoryPage from './pages/VulnCategoryPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import TerminalSessionProvider from './lab/TerminalSessionProvider.jsx';
 import TerminalPip from './lab/TerminalPip.jsx';
@@ -34,6 +36,8 @@ function App() {
           <Route index element={<LabHubPage />} />
           <Route path="terminal" element={<TerminalLabPage />} />
           <Route path="wireshark" element={<WiresharkLabPage />} />
+          <Route path="vuln" element={<VulnLabPage />} />
+          <Route path="vuln/:vulnId" element={<VulnCategoryPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>

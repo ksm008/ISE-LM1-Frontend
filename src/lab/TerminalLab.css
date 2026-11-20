@@ -77,17 +77,6 @@
   text-align: left;
 }
 
-.terminal-lab__pip-placeholder {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: #888;
-  font-size: 14px;
-}
-
 /* xterm 이 들어 있는 div (페이지와 PIP 사이를 옮겨 다닌다) */
 .terminal-host {
   width: 100%;

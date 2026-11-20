@@ -1,0 +1,524 @@
+/* ---- Wireshark 패킷 분석 화면 ---- */
+
+.ws-lab {
+  --ws-bg: #f3f3f3;
+  --ws-surface: #ffffff;
+  --ws-border: #c9c9c9;
+  --ws-text: #1b1b1b;
+  --ws-muted: #6b6b6b;
+  --ws-head: #ececec;
+  --ws-select: #2f6fd6;
+  --ws-select-text: #ffffff;
+  --ws-hl: #ffd75e;
+  --ws-hl-text: #000000;
+  --ws-valid: #c4f5c4;
+  --ws-invalid: #ffc7c7;
+
+  /* 패킷 색 (기본 색 규칙과 같은 계열) */
+  --pkt-tcp: #e7e6ff;
+  --pkt-udp: #daeeff;
+  --pkt-http: #e4ffc7;
+  --pkt-icmp: #fce0ff;
+  --pkt-arp: #faf0d7;
+  --pkt-synfin: #a0a0a0;
+  --pkt-rst: #a40000;
+  --pkt-rst-text: #fffc9c;
+  --pkt-other: #ffffff;
+
+  /* 헤더 높이 60px + 아래 테두리 1px. 넘치면 페이지 전체에 스크롤바가 생긴다 */
+  height: calc(100svh - 61px);
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  background: var(--ws-bg);
+  color: var(--ws-text);
+  /* 한국어 Windows 의 기본 글꼴(맑은 고딕)은 \ 를 ₩ 로 그리므로 Segoe UI 를 먼저 쓴다 (\r\n 표시) */
+  font-family: 'Segoe UI', system-ui, 'Malgun Gothic', sans-serif;
+  font-size: 13px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .ws-lab {
+    --ws-bg: #202124;
+    --ws-surface: #17181b;
+    --ws-border: #3a3b40;
+    --ws-text: #e4e4e7;
+    --ws-muted: #9a9aa3;
+    --ws-head: #2a2b2f;
+    --ws-select: #3b78e7;
+    --ws-hl: #b58b00;
+    --ws-hl-text: #ffffff;
+    --ws-valid: #1e4d27;
+    --ws-invalid: #5c2020;
+
+    --pkt-tcp: #2c2a4a;
+    --pkt-udp: #1f3346;
+    --pkt-http: #2c4321;
+    --pkt-icmp: #45284a;
+    --pkt-arp: #46402c;
+    --pkt-synfin: #4b4b4b;
+    --pkt-rst: #7a0f0f;
+    --pkt-other: #17181b;
+  }
+}
+
+/* 제목 줄 */
+.ws-titlebar {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 8px 12px 6px;
+}
+
+.ws-titlebar h1 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.ws-titlebar__back {
+  color: var(--ws-muted);
+  text-decoration: none;
+}
+
+.ws-titlebar__hint {
+  color: var(--ws-muted);
+  font-size: 12px;
+}
+
+/* 툴바 */
+.ws-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  padding: 4px 8px;
+  border-top: 1px solid var(--ws-border);
+  border-bottom: 1px solid var(--ws-border);
+}
+
+.ws-tool {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ws-text);
+  cursor: pointer;
+}
+
+.ws-tool:hover:not(:disabled) {
+  border-color: var(--ws-border);
+  background: var(--ws-surface);
+}
+
+.ws-tool:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.ws-tool.is-on {
+  border-color: var(--ws-border);
+  background: var(--ws-surface);
+  color: var(--ws-select);
+}
+
+.ws-tool--start { color: #1f6fe0; }
+.ws-tool--stop { color: #d12b2b; }
+.ws-tool--restart { color: #229a3c; }
+
+.ws-toolbar__sep {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--ws-border);
+}
+
+.ws-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ws-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.ws-field--grow {
+  flex: 1 1 240px;
+}
+
+.ws-field select,
+.ws-field input,
+.ws-filterbar input,
+.ws-filterbar select,
+.ws-filterbar button {
+  height: 26px;
+  border: 1px solid var(--ws-border);
+  border-radius: 3px;
+  background: var(--ws-surface);
+  color: var(--ws-text);
+  font: inherit;
+  font-size: 12px;
+}
+
+.ws-field input {
+  flex: 1;
+  min-width: 120px;
+  padding: 0 6px;
+  font-family: var(--mono);
+}
+
+/* 표시 필터 */
+.ws-filterbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--ws-border);
+}
+
+.ws-filterbar .ws-filterbar__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0 8px;
+  font-family: var(--mono);
+}
+
+.ws-filterbar__input.is-valid { background: var(--ws-valid); }
+.ws-filterbar__input.is-invalid { background: var(--ws-invalid); }
+
+.ws-filterbar .ws-filterbar__clear {
+  width: 26px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.ws-filterbar .ws-filterbar__apply {
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.ws-filterbar .ws-filterbar__apply:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ws-filterbar .ws-filterbar__examples {
+  max-width: 180px;
+}
+
+.ws-filterbar__error {
+  padding: 2px 10px;
+  color: #c62828;
+  font-size: 12px;
+}
+
+/* 창 */
+.ws-panes {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ws-pane {
+  min-height: 0;
+  flex-grow: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+  background: var(--ws-surface);
+}
+
+.ws-pane--scroll {
+  overflow: auto;
+}
+
+.ws-splitter {
+  flex: none;
+  height: 5px;
+  background: var(--ws-bg);
+  border-top: 1px solid var(--ws-border);
+  border-bottom: 1px solid var(--ws-border);
+  cursor: row-resize;
+  touch-action: none;
+}
+
+.ws-pane__empty {
+  padding: 12px;
+  color: var(--ws-muted);
+}
+
+/* 패킷 목록 */
+.ws-list {
+  --ws-columns: 64px 96px minmax(110px, 1fr) minmax(110px, 1fr) 76px 60px minmax(220px, 3fr);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+}
+
+.ws-list__head,
+.ws-list__row {
+  display: grid;
+  grid-template-columns: var(--ws-columns);
+  min-width: 760px;
+}
+
+.ws-list__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--ws-head);
+  border-bottom: 1px solid var(--ws-border);
+  font-weight: 600;
+}
+
+.ws-list__head span,
+.ws-list__row span {
+  padding: 0 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 20px;
+}
+
+.ws-list__head span + span {
+  border-left: 1px solid var(--ws-border);
+}
+
+.ws-list__row .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ws-list__body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  outline: none;
+}
+
+.ws-list__spacer {
+  position: relative;
+  min-width: 760px;
+}
+
+.ws-list__row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 20px;
+  color: #000;
+  cursor: default;
+}
+
+.ws-list__empty {
+  position: absolute;
+  inset: 40px 0 auto;
+  padding: 0 16px;
+  text-align: center;
+  color: var(--ws-muted);
+}
+
+.pkt--tcp { background: var(--pkt-tcp); }
+.pkt--udp { background: var(--pkt-udp); }
+.pkt--http { background: var(--pkt-http); }
+.pkt--icmp { background: var(--pkt-icmp); }
+.pkt--arp { background: var(--pkt-arp); }
+.pkt--synfin { background: var(--pkt-synfin); }
+.pkt--rst { background: var(--pkt-rst); color: var(--pkt-rst-text) !important; }
+.pkt--other { background: var(--pkt-other); }
+
+@media (prefers-color-scheme: dark) {
+  .ws-list__row { color: var(--ws-text); }
+}
+
+.ws-list__row.is-selected {
+  background: var(--ws-select);
+  color: var(--ws-select-text) !important;
+}
+
+/* 안내 */
+.ws-guide {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 24px;
+  color: var(--ws-text);
+  font-size: 13px;
+}
+
+.ws-guide ol {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.9;
+}
+
+.ws-guide a {
+  color: var(--ws-select);
+}
+
+.ws-guide code {
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--ws-head);
+  font-family: var(--mono);
+}
+
+.ws-guide > span {
+  color: var(--ws-muted);
+  font-size: 12px;
+}
+
+/* 상세 트리 */
+.ws-tree,
+.ws-tree ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ws-tree {
+  padding: 2px 0;
+  font-size: 12px;
+}
+
+.ws-tree__row {
+  display: flex;
+  align-items: center;
+  min-height: 19px;
+  padding-right: 8px;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.ws-tree__row:hover {
+  background: var(--ws-head);
+}
+
+.ws-tree__row.is-selected {
+  background: var(--ws-select);
+  color: var(--ws-select-text);
+}
+
+.ws-tree__arrow {
+  flex: none;
+  width: 16px;
+  text-align: center;
+  color: var(--ws-muted);
+  cursor: pointer;
+}
+
+.ws-tree__row.is-selected .ws-tree__arrow {
+  color: inherit;
+}
+
+.ws-tree__arrow.is-leaf {
+  cursor: default;
+}
+
+/* 바이트 */
+.ws-bytes {
+  padding: 4px 8px;
+  font: 12px/18px var(--mono);
+  white-space: pre;
+}
+
+.ws-bytes__line {
+  display: flex;
+  gap: 16px;
+}
+
+.ws-bytes__offset {
+  color: var(--ws-muted);
+}
+
+.ws-bytes__hex span {
+  display: inline-block;
+  width: 2ch;
+  margin-right: 1ch;
+  cursor: pointer;
+}
+
+.ws-bytes__hex span:nth-child(8) {
+  margin-right: 2ch;
+}
+
+.ws-bytes__ascii span {
+  cursor: pointer;
+}
+
+.ws-bytes .is-hl {
+  background: var(--ws-hl);
+  color: var(--ws-hl-text);
+}
+
+/* 상태 표시줄 */
+.ws-status {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 24px;
+  padding: 2px 10px;
+  border-top: 1px solid var(--ws-border);
+  background: var(--ws-head);
+  font-size: 12px;
+}
+
+.ws-status__dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #9e9e9e;
+}
+
+.ws-status__dot.is-ready { background: #2e7d32; }
+.ws-status__dot.is-live {
+  background: #d12b2b;
+  animation: ws-blink 1s steps(2, start) infinite;
+}
+
+@keyframes ws-blink {
+  to { visibility: hidden; }
+}
+
+.ws-status__msg.is-error {
+  color: #c62828;
+}
+
+.ws-status__field {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ws-muted);
+}
+
+.ws-status__count {
+  white-space: nowrap;
+  color: var(--ws-muted);
+}
+
+@media (max-width: 720px) {
+  .ws-status__field { display: none; }
+  .ws-filterbar .ws-filterbar__examples { max-width: 110px; }
+}
+
+.ws-guide__btn {
+  padding: 5px 14px;
+  border: 1px solid var(--ws-border);
+  border-radius: 4px;
+  background: var(--ws-surface);
+  color: var(--ws-text);
+  font: inherit;
+  cursor: pointer;
+}
