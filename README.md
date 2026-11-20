@@ -29,12 +29,19 @@
     - 우클릭: 선택한 글자가 있으면 복사, 없으면 붙여넣기 (Windows Terminal·PuTTY 방식). 브라우저가 처음 한 번 클립보드 권한을 묻습니다. HTTPS 또는 localhost 에서만 동작합니다.
     - eBPF 모니터링 로그 패널은 현재 비활성화되어 있습니다 (`src/pages/TerminalLabPage.jsx` 주석 참고).
   - 웹 취약점 실습: SQL 인젝션(Form, Union, Stored Procedure, Mass / Error-based, Blind), XSS(Stored, Reflected, DOM based), CSRF, SSRF, 운영체제 명령어 실행, 파일 업로드·다운로드, 경로 추적, 파일 삽입, URL/파라미터 변조, 불충분한 세션 관리, 정보누출 카테고리 (실습 내용은 준비 중)
+  - 라우터 설정 실습: IOS 스타일 명령을 쓰는 라우터 시뮬레이터 (브라우저 안에서 동작, 서버 자원 없음)
+    - 모드 전환(`Router>` → `#` → `(config)#` → `(config-if)#` / `(config-line)#`), 줄임말(`conf t`, `int g0/0`), `?` 즉시 도움말, Tab 자동 완성, ↑↓ 명령 기록, `no`·`do`, `% Invalid input detected at '^' marker.` 오류 위치 표시, `| include/exclude/begin/section` 출력 필터
+    - 1단계 범위: enable secret(type 5)·enable password·service password-encryption(type 7)·security passwords min-length, username, console/vty 라인(password, login, login local, exec-timeout, transport input, access-class), SSH(hostname, ip domain-name, crypto key generate rsa, ip ssh version), 불필요한 서비스 끄기(http server, cdp, source-route, small-servers, bootp, finger, domain lookup, 인터페이스의 directed-broadcast 등), banner motd, 인터페이스 IP·shutdown
+    - 터미널 실습과 같은 PIP: 콘솔을 쓰는 중에 다른 페이지로 가면 왼쪽 아래 PIP 창으로 바뀌고(터미널 PIP 는 오른쪽 아래), "원래 화면으로"로 돌아오면 입력하던 상태 그대로 이어집니다. PIP 의 ×는 라우터 끄기(저장하지 않은 설정은 사라짐)입니다.
+    - 콘솔 로그인(line password / login local)과 enable 비밀번호 확인, 저장(copy running-config startup-config, write memory)·reload·erase. 저장한 설정은 계정별로 브라우저(localStorage)에 남습니다. "라우터 초기화"로 공장 초기 상태
+    - ACL 과 접속 시험(토폴로지)은 다음 단계에서 추가합니다.
   - Wireshark 패킷 분석: 실행 중인 터미널 실습 컨테이너의 패킷을 실시간으로 캡처해 Wireshark와 비슷한 화면에서 분석합니다.
     - 페이지에 들어오면 터미널 실습이 자동으로 시작되고(진행 중이면 그대로 사용) 터미널이 PIP 창으로 뜹니다. PIP 터미널에서 명령을 실행하며 패킷을 확인합니다. 터미널 실습 툴바의 **Wireshark로 캡처** 버튼으로도 이동할 수 있습니다.
     - 패킷 목록(프로토콜별 색), 계층별 상세 트리, 16진수/ASCII 바이트 창. 트리 항목을 고르면 해당 바이트가 강조되고, 바이트를 누르면 해당 항목이 선택됩니다.
     - 해석하는 프로토콜: Ethernet, Linux cooked capture(v1/v2), ARP, IPv4, IPv6, ICMP, ICMPv6, TCP(상대 시퀀스 번호, 스트림 번호), UDP, DNS, HTTP, TLS(Client Hello SNI), SSH
     - 캡처 필터(BPF, tcpdump 문법)와 표시 필터(`ip.addr == 10.0.0.1`, `tcp.port in {80 443}`, `http.host contains "naver"`, `&&` `||` `!` 등 Wireshark 문법 일부)
     - pcap 파일 저장(표시 중인 패킷)과 열기(실습 없이도 가능, pcapng 미지원)
+    - 캡처 연결만 끊기면(다른 창에서 같은 실습의 캡처 화면을 연 경우 등) 상태 표시줄의 **다시 연결** 버튼으로 실습을 유지한 채 다시 연결합니다.
 
 ## 기술 스택
 
@@ -63,6 +70,7 @@ npm run dev
 | `npm run build` | 프로덕션 빌드 (`dist/` 생성) |
 | `npm run preview` | 빌드 결과 미리보기 |
 | `npm run lint` | oxlint 실행 |
+| `npm test` | 단위 테스트 (Vitest, 라우터 시뮬레이터 엔진) |
 
 ### 환경 변수
 
@@ -92,6 +100,7 @@ VITE_API_BASE_URL=http://localhost:8080
 | `/lab` | 실습 목록 |
 | `/lab/terminal` | 터미널 실습 |
 | `/lab/wireshark` | Wireshark 패킷 분석 실습 |
+| `/lab/router` | 라우터 설정 실습 |
 | `/lab/vuln` | 웹 취약점 실습 (카테고리 목록) |
 | `/lab/vuln/:vulnId` | 웹 취약점 카테고리 페이지 |
 
@@ -112,9 +121,21 @@ src/
 │   ├── TerminalSessionProvider.jsx  # 터미널 실습 세션 (xterm, WebSocket, 세션 시간, PIP 상태)
 │   ├── terminalSession.js    # 세션 컨텍스트와 useTerminalSession 훅
 │   ├── TerminalView.jsx      # xterm 을 붙여서 보여주는 자리 (페이지 / PIP)
-│   ├── TerminalPip.jsx       # PIP 창 (이동, 크기 조절, 갱신·종료 버튼)
+│   ├── PipFrame.jsx          # PIP 창 공통 틀 (이동, 8방향 크기 조절, 닫기) — 터미널·라우터 PIP 가 함께 사용
+│   ├── TerminalPip.jsx       # 터미널 PIP (원래 화면으로, 세션 갱신, 남은 시간, 종료)
 │   ├── SessionTimer.jsx      # 남은 세션 시간 표시
 │   └── TerminalLab.css
+├── router/                   # 라우터 설정 실습 (IOS 스타일 시뮬레이터)
+│   ├── engine/               # 명령 트리 엔진: tree.js(kw/arg 노드), types.js(값 형식), parser.js(해석·도움말·자동 완성)
+│   ├── commands/             # 모드별 명령 정의: exec, global, interface, line, index(no/do/exit/end 추가)
+│   ├── device/               # 장비 설정 상태(device.js), show running-config 출력(runningConfig.js)
+│   ├── crypto/               # MD5, type 5(MD5-crypt)·type 7 비밀번호
+│   ├── session.js            # 콘솔 세션: 모드, 로그인·enable, 저장·재부팅, 출력 필터, 자동 로그아웃
+│   ├── routerConsole.js      # xterm 위의 IOS 방식 줄 편집기 (? Tab ↑↓ Ctrl+Z 붙여넣기)
+│   ├── RouterSessionProvider.jsx # 콘솔 하나를 앱 전체에서 유지, 페이지·PIP 사이로 옮겨 붙임 (routerContext.js, RouterView.jsx)
+│   ├── RouterPip.jsx         # 라우터 PIP (원래 화면으로, 라우터 끄기)
+│   ├── *.test.js             # Vitest 단위 테스트
+│   └── RouterLab.css
 ├── wireshark/
 │   ├── useCapture.js         # 캡처 WebSocket 연결과 패킷 저장
 │   ├── dissect.js            # 패킷 해석기 (프로토콜별 상세 트리, 목록 요약, 필터 필드)
@@ -136,6 +157,7 @@ src/
     ├── LabHubPage.jsx        # 실습 목록
     ├── TerminalLabPage.jsx   # 터미널 실습
     ├── WiresharkLabPage.jsx  # Wireshark 실습
+    ├── RouterLabPage.jsx     # 라우터 설정 실습 (콘솔 + 명령 안내, 초기화)
     ├── VulnLabPage.jsx       # 웹 취약점 실습 카테고리 목록
     ├── VulnCategoryPage.jsx  # 웹 취약점 카테고리 (실습 내용은 추후 구성)
     ├── NotFoundPage.jsx      # 404

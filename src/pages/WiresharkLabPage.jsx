@@ -388,6 +388,12 @@ function WiresharkLabPage() {
           {notice?.text ??
             (ready ? '준비됨' : connection === 'connecting' ? '캡처 서버에 연결 중…' : labRunning ? '연결 끊김' : '실습 대기 중')}
         </span>
+        {/* 캡처 연결만 끊긴 경우: 실습(터미널)은 그대로 두고 다시 연결 */}
+        {labRunning && connection === 'closed' && (
+          <button type="button" className="ws-status__btn" onClick={capture.reconnect}>
+            다시 연결
+          </button>
+        )}
         <span className="ws-status__field">{selectedNode ? selectedNode.label : ''}</span>
         <span className="ws-status__count">
           {store.linkType !== null && `${LINK_TYPES[store.linkType] ?? `링크 타입 ${store.linkType}`} · `}

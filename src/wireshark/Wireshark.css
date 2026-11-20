@@ -522,3 +522,15 @@
   font: inherit;
   cursor: pointer;
 }
+
+.ws-status__btn {
+  flex: none;
+  padding: 1px 10px;
+  border: 1px solid var(--ws-border);
+  border-radius: 3px;
+  background: var(--ws-surface);
+  color: var(--ws-text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}

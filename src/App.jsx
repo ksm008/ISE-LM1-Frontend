@@ -8,6 +8,7 @@ import TerminalLabPage from './pages/TerminalLabPage.jsx';
 import WiresharkLabPage from './pages/WiresharkLabPage.jsx';
 import VulnLabPage from './pages/VulnLabPage.jsx';
 import VulnCategoryPage from './pages/VulnCategoryPage.jsx';
+import RouterLabPage from './pages/RouterLabPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage.jsx';
@@ -18,17 +19,22 @@ import AuthProvider from './auth/AuthProvider.jsx';
 import RequireAuth from './auth/RequireAuth.jsx';
 import TerminalSessionProvider from './lab/TerminalSessionProvider.jsx';
 import TerminalPip from './lab/TerminalPip.jsx';
+import RouterSessionProvider from './router/RouterSessionProvider.jsx';
+import RouterPip from './router/RouterPip.jsx';
 
-// 터미널 실습 세션은 PIP 모드에서 페이지를 이동해도 유지되도록 레이아웃에서 관리한다
+// 터미널·라우터 실습 세션은 PIP 모드에서 페이지를 이동해도 유지되도록 레이아웃에서 관리한다
 function Layout() {
   return (
     <AuthProvider>
       <TerminalSessionProvider>
-        <Header />
-        <main className="site-main">
-          <Outlet />
-        </main>
-        <TerminalPip />
+        <RouterSessionProvider>
+          <Header />
+          <main className="site-main">
+            <Outlet />
+          </main>
+          <TerminalPip />
+          <RouterPip />
+        </RouterSessionProvider>
       </TerminalSessionProvider>
     </AuthProvider>
   );
@@ -54,6 +60,7 @@ function App() {
             <Route index element={<LabHubPage />} />
             <Route path="terminal" element={<TerminalLabPage />} />
             <Route path="wireshark" element={<WiresharkLabPage />} />
+            <Route path="router" element={<RouterLabPage />} />
             <Route path="vuln" element={<VulnLabPage />} />
             <Route path="vuln/:vulnId" element={<VulnCategoryPage />} />
           </Route>

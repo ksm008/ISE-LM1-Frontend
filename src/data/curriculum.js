@@ -63,6 +63,13 @@ export const labs = [
     summary: '실습 터미널의 네트워크 패킷을 실시간으로 캡처해 Wireshark처럼 프로토콜별로 분석합니다.',
   },
   {
+    id: 'router',
+    title: '라우터 설정 실습',
+    path: '/lab/router',
+    icon: '⇄',
+    summary: 'IOS 스타일 명령으로 라우터의 접근 보안, 계정, SSH, 서비스 비활성화 등을 직접 설정해 봅니다.',
+  },
+  {
     id: 'vuln',
     title: '웹 취약점 실습',
     path: '/lab/vuln',

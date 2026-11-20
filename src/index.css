@@ -41,6 +41,12 @@
   box-sizing: border-box;
 }
 
+/* 세로 스크롤바 자리를 항상 비워 둔다. 내용이 긴 페이지(메인 등)에만 스크롤바가 생기면
+   쓸 수 있는 폭이 줄어 가운데 정렬된 헤더·본문이 스크롤바 폭의 절반만큼 옆으로 밀린다. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   background: var(--bg);

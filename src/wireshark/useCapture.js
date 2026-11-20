@@ -37,7 +37,9 @@ function addPacket(store, packet) {
  */
 export function useCapture(labId) {
   // 연결 상태는 labId 별로 기록하고, 현재 labId 의 것만 쓴다 (ready | capturing | closed)
-  const [link, setLink] = useState({ labId: null, status: null });
+  // 연결 상태는 연결 키(labId + 다시 연결 횟수)별로 기록하고, 현재 키의 것만 쓴다
+  const [attempt, setAttempt] = useState(0);
+  const [link, setLink] = useState({ key: null, status: null });
   const [interfaces, setInterfaces] = useState(['any']);
   const [notice, setNotice] = useState(null); // { text, error }
   const [version, setVersion] = useState(0); // 패킷이 바뀔 때마다 증가
@@ -51,7 +53,8 @@ export function useCapture(labId) {
     setStore(next);
   };
 
-  const linkStatus = !labId ? 'idle' : link.labId === labId && link.status ? link.status : 'connecting';
+  const connKey = labId ? `${labId}#${attempt}` : null;
+  const linkStatus = !labId ? 'idle' : link.key === connKey && link.status ? link.status : 'connecting';
   const connection = linkStatus === 'capturing' ? 'ready' : linkStatus; // idle | connecting | ready | closed
   const capturing = linkStatus === 'capturing';
 
@@ -60,7 +63,8 @@ export function useCapture(labId) {
     const ws = new WebSocket(`${WS_BASE_URL}/ws/capture?labId=${encodeURIComponent(labId)}`);
     wsRef.current = ws;
     let closedByUs = false;
-    const setStatus = (status) => setLink({ labId, status });
+    const key = `${labId}#${attempt}`;
+    const setStatus = (status) => setLink({ key, status });
 
     ws.onmessage = (event) => {
       let message;
@@ -114,7 +118,13 @@ export function useCapture(labId) {
       closedByUs = true;
       ws.close();
     };
-  }, [labId]);
+  }, [labId, attempt]);
+
+  /** 끊긴 캡처 연결을 다시 맺는다 (실습은 그대로) */
+  const reconnect = useCallback(() => {
+    setNotice(null);
+    setAttempt((a) => a + 1);
+  }, []);
 
   const send = (message) => {
     const ws = wsRef.current;
@@ -153,6 +163,7 @@ export function useCapture(labId) {
 
   return {
     connection,
+    reconnect,
     capturing,
     interfaces,
     notice,
