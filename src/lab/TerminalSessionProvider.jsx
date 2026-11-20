@@ -5,6 +5,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
 import { TerminalSessionContext, terminalLabPath } from './terminalSession.js';
 import { WS_BASE_URL } from '../config.js';
+import { useAuth } from '../auth/authContext.js';
 
 // 세션 만료 이 시간 전에 터미널에 안내를 띄운다
 const EXPIRY_WARNING_MS = 60_000;
@@ -61,6 +62,7 @@ async function handleRightClick(term) {
 function TerminalSessionProvider({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { me } = useAuth();
 
   const hostRef = useRef(null); // xterm 이 들어 있는 div
   const termRef = useRef(null);
@@ -76,8 +78,9 @@ function TerminalSessionProvider({ children }) {
   const [startPending, setStartPending] = useState(false); // xterm 이 붙기를 기다리는 실습 시작 요청
   const [lingering, setLingering] = useState(false); // PIP 에서 실습이 끝났지만 아직 닫지 않음
 
+  const signedIn = Boolean(me?.active);
   const onLabPage = location.pathname === terminalLabPath;
-  const pip = !onLabPage && (labId !== null || startPending || lingering);
+  const pip = signedIn && !onLabPage && (labId !== null || startPending || lingering);
 
   useEffect(() => {
     pathnameRef.current = location.pathname;
@@ -327,6 +330,14 @@ function TerminalSessionProvider({ children }) {
     stopLab();
     setLingering(false);
   }, [stopLab]);
+
+  // 로그아웃하거나 이용할 수 없는 상태가 되면 실습 연결을 끊는다 (상태 정리는 WebSocket onclose 에서).
+  // PIP 표시는 signedIn 으로 계산하므로 로그아웃하면 바로 사라진다.
+  useEffect(() => {
+    if (signedIn) return;
+    pendingStartRef.current = null;
+    wsRef.current?.stopByUser();
+  }, [signedIn]);
 
   const value = useMemo(
     () => ({

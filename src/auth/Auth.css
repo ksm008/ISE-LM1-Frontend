@@ -1,0 +1,266 @@
+/* ---- 로그인 · 회원가입 · 이메일 인증 · 내 계정 ---- */
+
+.auth-page {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 48px 16px;
+}
+
+.auth-loading {
+  padding: 48px 16px;
+  text-align: center;
+  color: var(--text);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.auth-card--wide {
+  max-width: 480px;
+}
+
+.auth-card h1 {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 22px;
+}
+
+.auth-card__desc {
+  margin: -4px 0 4px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.auth-card__desc strong {
+  color: var(--text-strong);
+  word-break: break-all;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.auth-field input,
+.auth-readonly {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-strong);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.auth-readonly {
+  display: flex;
+  align-items: center;
+  word-break: break-all;
+}
+
+.auth-field input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.auth-field input[aria-invalid='true'] {
+  border-color: #d93025;
+}
+
+.auth-field__hint,
+.auth-field__error {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.auth-field__hint {
+  color: var(--text);
+}
+
+.auth-field__error {
+  color: #d93025;
+}
+
+.auth-code {
+  font-family: var(--mono) !important;
+  font-size: 24px !important;
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+.auth-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: -6px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.auth-checks .is-ok {
+  color: #1e8e3e;
+  font-weight: 600;
+}
+
+.auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-strong);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.auth-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.auth-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-btn--primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.auth-btn--google {
+  font-weight: 500;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-hint {
+  margin: -6px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.auth-alert {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(217, 48, 37, 0.1);
+  color: #c5221f;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.auth-alert--info {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.auth-foot {
+  margin: 4px 0 0;
+  font-size: 13px;
+  text-align: center;
+}
+
+.auth-foot a,
+.auth-link {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.auth-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.auth-info {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 10px 12px;
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.auth-info dt {
+  color: var(--text);
+}
+
+.auth-info dd {
+  margin: 0;
+  color: var(--text-strong);
+  word-break: break-all;
+}
+
+.auth-badge {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* 메인 페이지 미리 보기 안내 */
+.preview-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding: 16px 20px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--text-strong);
+  font-size: 14px;
+}
+
+.preview-banner__actions {
+  display: flex;
+  gap: 8px;
+}

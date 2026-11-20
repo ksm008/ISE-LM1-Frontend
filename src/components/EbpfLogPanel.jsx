@@ -55,7 +55,8 @@ function EbpfLogPanel({ labId, onReady }) {
 
     stickToBottomRef.current = true;
 
-    const es = new EventSource(`${API_BASE_URL}/api/logs?labId=${encodeURIComponent(labId)}`);
+    // 로그인 세션 쿠키를 함께 보낸다 (/api/logs 는 로그인 필요)
+    const es = new EventSource(`${API_BASE_URL}/api/logs?labId=${encodeURIComponent(labId)}`, { withCredentials: true });
     let ready = false;
     const notifyReady = () => {
       if (ready) return;

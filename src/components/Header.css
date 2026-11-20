@@ -181,3 +181,57 @@
     min-width: 0;
   }
 }
+
+/* ---- 로그인 상태 (헤더 오른쪽) ---- */
+.site-auth {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.site-auth__user {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-strong);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.site-auth__badge {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.site-auth__badge--warn {
+  background: rgba(234, 134, 0, 0.15);
+  color: #b06000;
+}
+
+.site-auth__btn {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-strong);
+  font: inherit;
+  font-size: 13px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.site-auth__btn:hover {
+  border-color: var(--accent);
+}
+
+.site-auth__btn--primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}

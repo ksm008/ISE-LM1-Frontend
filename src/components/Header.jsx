@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router';
+import { useAuth } from '../auth/authContext.js';
 import { isecTopics, labPath, labs, topicPath } from '../data/curriculum.js';
 import './Header.css';
 
@@ -7,6 +8,14 @@ function Header() {
   const [isecOpen, setIsecOpen] = useState(false);
   const menuRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { me, logout } = useAuth();
+
+  // 먼저 메인(공개 페이지)으로 이동한 뒤 로그아웃한다. 반대로 하면 보호된 페이지가 로그인 화면으로 먼저 보낸다.
+  const handleLogout = async () => {
+    navigate('/');
+    await logout();
+  };
 
   // 메뉴 밖을 누르거나 Esc 를 누르면 닫기 (터치 기기 대응)
   useEffect(() => {
@@ -87,6 +96,33 @@ function Header() {
             </NavLink>
           </div>
         </nav>
+
+        {/* 로그인 상태 (오른쪽 끝) */}
+        <div className="site-auth">
+          {me?.authenticated ? (
+            <>
+              <NavLink to={me.active ? '/account' : '/verify-email'} className="site-auth__user">
+                {me.username}
+                {me.role === 'ADMIN' && <span className="site-auth__badge">관리자</span>}
+                {!me.active && <span className="site-auth__badge site-auth__badge--warn">인증 필요</span>}
+              </NavLink>
+              <button type="button" className="site-auth__btn" onClick={handleLogout}>
+                로그아웃
+              </button>
+            </>
+          ) : (
+            me && (
+              <>
+                <Link to="/login" className="site-auth__btn">
+                  로그인
+                </Link>
+                <Link to="/signup" className="site-auth__btn site-auth__btn--primary">
+                  회원가입
+                </Link>
+              </>
+            )
+          )}
+        </div>
       </div>
     </header>
   );

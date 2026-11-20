@@ -1,10 +1,41 @@
 import { Link } from 'react-router';
+import { useAuth } from '../auth/authContext.js';
+import '../auth/Auth.css';
 import { isecTopics, labPath, labs, topicPath } from '../data/curriculum.js';
 import './Pages.css';
 
 function HomePage() {
+  const { me } = useAuth();
+
   return (
     <div className="page">
+      {/* 로그인 전에는 메인 페이지만 미리 보기로 볼 수 있다 */}
+      {me && !me.active && (
+        <div className="preview-banner">
+          <span>
+            {me.authenticated
+              ? '이메일 인증을 마치면 모든 학습 콘텐츠와 실습을 이용할 수 있습니다.'
+              : '미리 보기 화면입니다. 로그인하면 모든 학습 콘텐츠와 실습을 이용할 수 있습니다.'}
+          </span>
+          <span className="preview-banner__actions">
+            {me.authenticated ? (
+              <Link to="/verify-email" className="btn btn--primary">
+                이메일 인증하기
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" className="btn btn--primary">
+                  로그인
+                </Link>
+                <Link to="/signup" className="btn">
+                  회원가입
+                </Link>
+              </>
+            )}
+          </span>
+        </div>
+      )}
+
       <section className="hero">
         <p className="hero__eyebrow">자격증 학습 사이트</p>
         <h1 className="hero__title">
