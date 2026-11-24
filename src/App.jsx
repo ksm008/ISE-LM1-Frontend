@@ -55,6 +55,7 @@ function App() {
         <Route element={<RequireAuth />}>
           <Route path="account" element={<AccountPage />} />
           <Route path="isec/:topicId" element={<TopicPage />} />
+          <Route path="isec/:topicId/:docSlug" element={<TopicPage />} />
           <Route path="linux" element={<LinuxMasterPage />} />
           <Route path="lab">
             <Route index element={<LabHubPage />} />

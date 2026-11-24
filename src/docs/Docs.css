@@ -1,0 +1,280 @@
+/* ---------- 학습 문서 (항목 페이지) ----------
+   문서 목록 | 본문 | 목차. 양옆 칸의 폭이 같아서 본문이 페이지(헤더) 가운데에 온다.
+   화면이 넓으면 .docs 가 페이지 본문 폭(.page)보다 양옆으로 넓어져, 본문은 페이지 폭을 다 쓰고
+   문서 목록·목차는 그 바깥에 놓인다. 화면이 좁으면 양옆 칸이 안쪽으로 들어오고 본문이 좁아진다. */
+.docs {
+  --docs-side: 210px;
+  --docs-gap: 28px;
+  /* 페이지 본문 폭 + 양옆 칸. 화면 폭(스크롤바·여백 48px 제외)을 넘지 않는다 */
+  --docs-width: min(calc(100% + 2 * (var(--docs-side) + var(--docs-gap))), calc(100vw - 48px));
+  display: grid;
+  grid-template-columns: var(--docs-side) minmax(0, 1fr) var(--docs-side);
+  gap: var(--docs-gap);
+  align-items: start;
+  width: var(--docs-width);
+  margin-left: calc((100% - var(--docs-width)) / 2);
+}
+
+.docs-nav,
+.docs-toc-col {
+  position: sticky;
+  top: 80px;
+  max-height: calc(100svh - 100px);
+  overflow-y: auto;
+}
+
+.docs-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.docs-side__label {
+  margin: 0 0 6px;
+  padding: 0 8px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.docs-nav a {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.docs-nav a:hover {
+  color: var(--text-strong);
+  background: var(--accent-soft);
+}
+
+.docs-nav a[aria-current='page'] {
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+.docs-nav__num {
+  font-family: var(--mono);
+  opacity: 0.7;
+}
+
+.docs-main {
+  min-width: 0;
+}
+
+/* 목차 (오른쪽) */
+.docs-toc {
+  padding: 12px 4px;
+}
+
+.docs-toc ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-left: 1px solid var(--border);
+}
+
+.docs-toc button {
+  display: block;
+  width: 100%;
+  margin-left: -1px;
+  padding: 5px 8px 5px 12px;
+  border: 0;
+  border-left: 2px solid transparent;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+  line-height: 1.45;
+  text-align: left;
+  cursor: pointer;
+}
+
+.docs-toc button:hover {
+  color: var(--text-strong);
+}
+
+.docs-toc button[aria-current='location'] {
+  border-left-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.docs-toc__item--h3 button {
+  padding-left: 24px;
+}
+
+.docs-toc__item--h4 button {
+  padding-left: 36px;
+  font-size: 13px;
+}
+
+.docs-article {
+  min-width: 0;
+  padding: 28px 32px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.docs-status {
+  color: var(--text);
+}
+
+/* 좁은 화면: 목차는 숨기고 문서 목록을 본문 위에 둔다 */
+@media (max-width: 1180px) {
+  .docs {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    width: auto;
+    margin-left: 0;
+  }
+  .docs-nav {
+    position: static;
+    max-height: none;
+  }
+  .docs-toc-col {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .docs-article {
+    padding: 20px 16px;
+  }
+}
+
+/* ---------- Markdown 본문 ---------- */
+.markdown-body {
+  color: var(--text-strong);
+  font-size: 15.5px;
+  line-height: 1.75;
+  overflow-wrap: break-word;
+}
+
+.markdown-body > :first-child {
+  margin-top: 0;
+}
+
+.markdown-body > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  margin: 1.8em 0 0.6em;
+  scroll-margin-top: 80px; /* 목차로 이동할 때 고정 헤더에 가리지 않게 */
+  color: var(--text-strong);
+  line-height: 1.35;
+}
+
+.markdown-body h1 {
+  font-size: 26px;
+}
+
+.markdown-body h2 {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  font-size: 21px;
+}
+
+.markdown-body h3 {
+  font-size: 17px;
+}
+
+.markdown-body p,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body table,
+.markdown-body pre,
+.markdown-body blockquote {
+  margin: 0 0 1em;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.5em;
+}
+
+.markdown-body li + li {
+  margin-top: 0.3em;
+}
+
+.markdown-body li > pre {
+  margin-top: 0.5em;
+}
+
+.markdown-body a {
+  color: var(--accent);
+}
+
+.markdown-body code {
+  padding: 0.15em 0.4em;
+  border-radius: 5px;
+  background: var(--accent-soft);
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+.markdown-body pre {
+  overflow-x: auto;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  line-height: 1.55;
+}
+
+.markdown-body pre code {
+  padding: 0;
+  background: none;
+  font-size: 13.5px;
+}
+
+.markdown-body blockquote {
+  padding: 4px 16px;
+  border-left: 3px solid var(--accent);
+  color: var(--text);
+}
+
+.markdown-body table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 14.5px;
+}
+
+.markdown-body th,
+.markdown-body td {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-body th {
+  background: var(--bg);
+  white-space: nowrap;
+}
+
+.markdown-body hr {
+  margin: 2em 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.markdown-body img {
+  max-width: 100%;
+}

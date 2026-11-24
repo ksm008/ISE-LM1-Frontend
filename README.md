@@ -17,6 +17,7 @@
     3. 보안 로그 수집, 분석 및 침해 대응
     4. 위험분석 및 정보보호 대책 수립
     5. 최신 보안 동향
+  - 항목 페이지에는 백엔드의 학습 문서(Markdown)를 보여 줍니다. 본문은 페이지 가운데, 왼쪽에 문서 목록, 오른쪽에 목차(소제목 `##`·`###`·`####`, 누르면 그 위치로 스크롤하고 지금 보는 위치를 표시)가 있습니다. 화면 폭이 1180px 이하이면 목차를 숨기고 문서 목록을 본문 위에 둡니다. 이전/다음 문서로 이동할 수 있고, 문서가 없는 항목은 "준비하고 있습니다"로 표시합니다.
   - 리눅스마스터 1급: 준비 중
 - **상단 메뉴**: 정보보안기사 메뉴에 마우스를 올리면 주요 항목과 실습 메뉴를 바로 선택할 수 있습니다.
 - **실습**
@@ -51,6 +52,7 @@
 | 빌드 도구 | Vite 8 |
 | 라우팅 | React Router 8 |
 | 터미널 | xterm.js (`@xterm/xterm`, `@xterm/addon-fit`) |
+| 문서 | react-markdown, remark-gfm (HTML 태그는 실행하지 않음) |
 | 린트 | oxlint |
 
 ## 시작하기
@@ -95,7 +97,8 @@ VITE_API_BASE_URL=http://localhost:8080
 | `/signup/google` | 연동 계정이 없는 구글 계정으로 가입 (누구나) |
 | `/verify-email` | 이메일 인증번호 입력 (로그인, 인증 전) |
 | `/account` | 내 계정, 구글 연동 (이하 로그인 필요) |
-| `/isec/:topicId` | 정보보안기사 항목별 페이지 |
+| `/isec/:topicId` | 정보보안기사 항목별 페이지 (첫 번째 학습 문서) |
+| `/isec/:topicId/:docSlug` | 항목의 학습 문서 |
 | `/linux` | 리눅스마스터 1급 페이지 |
 | `/lab` | 실습 목록 |
 | `/lab/terminal` | 터미널 실습 |
@@ -148,11 +151,13 @@ src/
 │   └── Wireshark.css
 ├── config.js                 # 백엔드 주소 (VITE_API_BASE_URL)
 ├── api.js                    # REST 호출 (세션 쿠키, CSRF 헤더, 한국어 오류)
+├── docs/                     # 학습 문서: useDocs.js(/api/docs 호출), MarkdownDoc.jsx(react-markdown + GFM 표),
+│                             # headings.js(소제목 id), DocToc.jsx(오른쪽 목차), Docs.css(목록 | 본문 | 목차 배치)
 ├── auth/                     # AuthProvider·useAuth(로그인 상태), RequireAuth(로그인 필요 라우트),
 │                             # policy.js(아이디·비밀번호 규칙), PasswordFields, GoogleIcon, Auth.css
 └── pages/
     ├── HomePage.jsx          # 메인 페이지
-    ├── TopicPage.jsx         # 정보보안기사 항목 페이지
+    ├── TopicPage.jsx         # 정보보안기사 항목 페이지 (학습 문서 목록·본문)
     ├── LinuxMasterPage.jsx   # 리눅스마스터 1급 페이지
     ├── LabHubPage.jsx        # 실습 목록
     ├── TerminalLabPage.jsx   # 터미널 실습
@@ -169,6 +174,7 @@ src/
 메뉴, 메인 페이지, 항목 페이지는 모두 `src/data/curriculum.js` 의 데이터를 기준으로 그려집니다.
 
 - 정보보안기사 항목을 추가하거나 수정하려면 `isecTopics` 배열을 수정합니다.
+- 항목의 학습 문서는 프론트가 아니라 백엔드 `docs/isec/{항목 id}/` 에 `.md` 파일로 추가합니다 (백엔드 README "학습 문서").
 - 리눅스마스터 1급 항목은 `exams` 배열의 `linux` 항목 `topics` 에 추가합니다.
 - 웹 취약점 실습 카테고리는 `vulnCategories` 배열(세부 유형은 `groups`)을 수정합니다.
 - 실습을 추가하려면 `labs` 배열에 항목을 추가하고, `App.jsx` 의 `/lab` 하위에 라우트를 등록합니다.
