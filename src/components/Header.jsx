@@ -36,95 +36,103 @@ function Header() {
 
   const isIsecActive = location.pathname.startsWith('/isec') || location.pathname.startsWith(labPath);
 
-  return (
-    <header className="site-header">
-      <div className="site-header__inner">
-        <Link to="/" className="site-header__brand">
-          ISE·LM1 스터디
+  // 로그인 상태. 넓은 화면은 헤더 오른쪽, 좁은 화면(720px 이하)은 헤더 아래 줄에 보인다 (CSS 로 둘 중 하나만 표시)
+  const auth = me?.authenticated ? (
+    <>
+      <NavLink to={me.active ? '/account' : '/verify-email'} className="site-auth__user">
+        <span className="site-auth__name">{me.username}</span>
+        {me.role === 'ADMIN' && <span className="site-auth__badge">관리자</span>}
+        {!me.active && <span className="site-auth__badge site-auth__badge--warn">인증 필요</span>}
+      </NavLink>
+      <button type="button" className="site-auth__btn" onClick={handleLogout}>
+        로그아웃
+      </button>
+    </>
+  ) : (
+    me && (
+      <>
+        <Link to="/login" className="site-auth__btn">
+          로그인
         </Link>
+        <Link to="/signup" className="site-auth__btn site-auth__btn--primary">
+          회원가입
+        </Link>
+      </>
+    )
+  );
 
-        <nav className="site-nav" aria-label="자격증 메뉴">
-          <div
-            ref={menuRef}
-            className={`site-nav__item has-dropdown${isecOpen ? ' is-open' : ''}`}
-            onMouseEnter={() => setIsecOpen(true)}
-            onMouseLeave={() => setIsecOpen(false)}
-            onBlur={(e) => {
-              if (!e.currentTarget.contains(e.relatedTarget)) setIsecOpen(false);
-            }}
-          >
-            <button
-              type="button"
-              className={`site-nav__link${isIsecActive ? ' is-active' : ''}`}
-              aria-haspopup="true"
-              aria-expanded={isecOpen}
-              onClick={() => setIsecOpen((v) => !v)}
-              onFocus={() => setIsecOpen(true)}
+  return (
+    <>
+      <header className="site-header">
+        <div className="site-header__inner">
+          <Link to="/" className="site-header__brand">
+            ISE·LM1<span className="site-header__brand-sub"> 스터디</span>
+          </Link>
+
+          <nav className="site-nav" aria-label="자격증 메뉴">
+            <div
+              ref={menuRef}
+              className={`site-nav__item has-dropdown${isecOpen ? ' is-open' : ''}`}
+              onMouseEnter={() => setIsecOpen(true)}
+              onMouseLeave={() => setIsecOpen(false)}
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget)) setIsecOpen(false);
+              }}
             >
-              정보보안기사
-              <span className="site-nav__caret" aria-hidden="true">▾</span>
-            </button>
-
-            {/* 메뉴 항목을 누르면 이동과 함께 닫힘 */}
-            <ul className="dropdown" role="menu" onClick={() => setIsecOpen(false)}>
-              {isecTopics.map((topic, idx) => (
-                <li key={topic.id} role="none">
-                  <NavLink to={topicPath(topic.id)} role="menuitem" className="dropdown__link">
-                    <span className="dropdown__num">{idx + 1}</span>
-                    {topic.title}
-                  </NavLink>
-                </li>
-              ))}
-              <li role="separator" className="dropdown__divider" />
-              <li role="presentation" className="dropdown__label">
-                <Link to={labPath}>실습</Link>
-              </li>
-              {labs.map((lab) => (
-                <li key={lab.id} role="none">
-                  <NavLink to={lab.path} role="menuitem" className="dropdown__link dropdown__link--lab">
-                    <span className="dropdown__num" aria-hidden="true">{lab.icon}</span>
-                    {lab.title}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="site-nav__item">
-            <NavLink to="/linux" className={({ isActive }) => `site-nav__link${isActive ? ' is-active' : ''}`}>
-              리눅스마스터 1급
-            </NavLink>
-          </div>
-        </nav>
-
-        {/* 로그인 상태 (오른쪽 끝) */}
-        <div className="site-auth">
-          {me?.authenticated ? (
-            <>
-              <NavLink to={me.active ? '/account' : '/verify-email'} className="site-auth__user">
-                {me.username}
-                {me.role === 'ADMIN' && <span className="site-auth__badge">관리자</span>}
-                {!me.active && <span className="site-auth__badge site-auth__badge--warn">인증 필요</span>}
-              </NavLink>
-              <button type="button" className="site-auth__btn" onClick={handleLogout}>
-                로그아웃
+              <button
+                type="button"
+                className={`site-nav__link${isIsecActive ? ' is-active' : ''}`}
+                aria-haspopup="true"
+                aria-expanded={isecOpen}
+                onClick={() => setIsecOpen((v) => !v)}
+                onFocus={() => setIsecOpen(true)}
+              >
+                정보보안기사
+                <span className="site-nav__caret" aria-hidden="true">▾</span>
               </button>
-            </>
-          ) : (
-            me && (
-              <>
-                <Link to="/login" className="site-auth__btn">
-                  로그인
-                </Link>
-                <Link to="/signup" className="site-auth__btn site-auth__btn--primary">
-                  회원가입
-                </Link>
-              </>
-            )
-          )}
+
+              {/* 메뉴 항목을 누르면 이동과 함께 닫힘 */}
+              <ul className="dropdown" role="menu" onClick={() => setIsecOpen(false)}>
+                {isecTopics.map((topic, idx) => (
+                  <li key={topic.id} role="none">
+                    <NavLink to={topicPath(topic.id)} role="menuitem" className="dropdown__link">
+                      <span className="dropdown__num">{idx + 1}</span>
+                      {topic.title}
+                    </NavLink>
+                  </li>
+                ))}
+                <li role="separator" className="dropdown__divider" />
+                <li role="presentation" className="dropdown__label">
+                  <Link to={labPath}>실습</Link>
+                </li>
+                {labs.map((lab) => (
+                  <li key={lab.id} role="none">
+                    <NavLink to={lab.path} role="menuitem" className="dropdown__link dropdown__link--lab">
+                      <span className="dropdown__num" aria-hidden="true">{lab.icon}</span>
+                      {lab.title}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="site-nav__item">
+              <NavLink to="/linux" className={({ isActive }) => `site-nav__link${isActive ? ' is-active' : ''}`}>
+                리눅스마스터 1급
+              </NavLink>
+            </div>
+          </nav>
+
+          {/* 로그인 상태 (오른쪽 끝, 넓은 화면) */}
+          <div className="site-auth site-auth--header">{auth}</div>
         </div>
+      </header>
+
+      {/* 로그인 상태 (헤더 아래 줄, 좁은 화면). 헤더와 달리 고정하지 않아 스크롤하면 올라간다 */}
+      <div className="site-account-bar">
+        <div className="site-auth">{auth}</div>
       </div>
-    </header>
+    </>
   );
 }
 

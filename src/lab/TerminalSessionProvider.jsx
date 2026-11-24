@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
+import { TERMINAL_FONT, applyTerminalFontSize, terminalFontSize } from './terminalFont.js';
 import '@xterm/xterm/css/xterm.css';
 import { TerminalSessionContext, terminalLabPath } from './terminalSession.js';
 import { WS_BASE_URL } from '../config.js';
@@ -99,6 +100,7 @@ function TerminalSessionProvider({ children }) {
     const host = hostRef.current;
     if (!fitRef.current || !host?.isConnected || host.clientWidth === 0 || host.clientHeight === 0) return;
     try {
+      if (termRef.current) applyTerminalFontSize(termRef.current, host.clientWidth);
       fitRef.current.fit();
     } catch {
       // 화면에 붙어 있지 않은 순간에는 크기를 계산하지 못할 수 있음
@@ -232,8 +234,8 @@ function TerminalSessionProvider({ children }) {
         const term = new Terminal({
           cursorBlink: true,
           cursorStyle: 'block',
-          fontSize: 14,
-          fontFamily: 'Consolas, "Courier New", monospace',
+          fontSize: terminalFontSize(slot.clientWidth),
+          fontFamily: TERMINAL_FONT,
           theme: {
             background: '#000000',
             foreground: '#d4d4d4',

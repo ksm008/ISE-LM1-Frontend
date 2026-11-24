@@ -1,5 +1,6 @@
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
+import { TERMINAL_FONT, applyTerminalFontSize, terminalFontSize } from '../lab/terminalFont.js';
 import '@xterm/xterm/css/xterm.css';
 import { RouterSession } from './session.js';
 
@@ -34,8 +35,8 @@ const ESCAPES = [
 export function openRouterConsole(host, { startup, onStartupChange, onActivity }) {
   const term = new Terminal({
     cursorBlink: true,
-    fontSize: 14,
-    fontFamily: 'Consolas, "Courier New", monospace',
+    fontSize: terminalFontSize(host.clientWidth),
+    fontFamily: TERMINAL_FONT,
     theme: { background: '#0b0f14', foreground: '#d7dde5', cursor: '#7ee787' },
     scrollback: 5000,
   });
@@ -46,6 +47,7 @@ export function openRouterConsole(host, { startup, onStartupChange, onActivity }
   const fit = () => {
     if (!host.isConnected || host.clientWidth === 0 || host.clientHeight === 0) return;
     try {
+      applyTerminalFontSize(term, host.clientWidth);
       fitAddon.fit();
     } catch {
       // 크기를 계산할 수 없는 순간

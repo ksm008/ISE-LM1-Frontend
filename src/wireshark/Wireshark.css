@@ -25,8 +25,8 @@
   --pkt-rst-text: #fffc9c;
   --pkt-other: #ffffff;
 
-  /* 헤더 높이 60px + 아래 테두리 1px. 넘치면 페이지 전체에 스크롤바가 생긴다 */
-  height: calc(100svh - 61px);
+  /* 헤더(+ 좁은 화면의 계정 줄)를 뺀 화면 높이. 넘치면 페이지 전체에 스크롤바가 생긴다 */
+  height: calc(100svh - var(--header-h) - var(--account-bar-h));
   min-height: 520px;
   display: flex;
   flex-direction: column;
@@ -511,6 +511,40 @@
 @media (max-width: 720px) {
   .ws-status__field { display: none; }
   .ws-filterbar .ws-filterbar__examples { max-width: 110px; }
+}
+
+/* 휴대폰: 제목·도구·상태 줄을 줄여 패킷 창에 높이를 더 준다 */
+@media (max-width: 600px) {
+  .ws-titlebar {
+    padding: 6px 10px 4px;
+  }
+  .ws-titlebar__hint {
+    display: none;
+  }
+  .ws-toolbar {
+    padding: 3px 6px;
+  }
+  .ws-toolbar__sep {
+    margin: 0 2px;
+  }
+  .ws-field--grow {
+    flex-basis: 100%;
+  }
+  .ws-filterbar {
+    padding: 3px 6px;
+  }
+  /* 상태 줄은 한 줄로: 길면 패킷 수 부분을 말줄임 */
+  .ws-status {
+    gap: 8px;
+    padding: 2px 8px;
+    white-space: nowrap;
+  }
+  .ws-status__count {
+    min-width: 0;
+    margin-left: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .ws-guide__btn {

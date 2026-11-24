@@ -1,26 +1,29 @@
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { isecTopics, labPath, topicPath } from '../data/curriculum.js';
+import { isecTopics, labPath, topicDocsDir, topicPath } from '../data/curriculum.js';
 import { useDoc, useDocList } from '../docs/useDocs.js';
 import MarkdownDoc from '../docs/MarkdownDoc.jsx';
-import DocToc from '../docs/DocToc.jsx';
+import { DocToc, DocTocSheet } from '../docs/DocToc.jsx';
+import { useActiveHeading } from '../docs/useActiveHeading.js';
 import NotFoundPage from './NotFoundPage.jsx';
 import './Pages.css';
 
-// 항목의 학습 문서: 백엔드 docs/isec/{topicId}/*.md. 주소는 /isec/{topicId}[/{문서}] (문서를 빼면 첫 문서)
+// 항목의 학습 문서: 백엔드 docs/isec/{번호-topicId}/*.md (topicDocsDir). 주소는 /isec/{topicId}[/{문서}] (문서를 빼면 첫 문서)
 // 배치: 문서 목록 | 본문 | 목차. 양옆 폭이 같아서 본문이 페이지 가운데에 온다 (Docs.css)
 function TopicDocs({ topicId, docSlug }) {
-  const list = useDocList('isec', topicId);
+  const docsDir = topicDocsDir(topicId);
+  const list = useDocList('isec', docsDir);
   const docs = list.data ?? [];
   const index = docSlug ? docs.findIndex((d) => d.slug === docSlug) : 0;
   const current = docs[index];
-  const doc = useDoc('isec', topicId, current?.slug);
+  const doc = useDoc('isec', docsDir, current?.slug);
 
   // 목차는 지금 보이는 문서의 것만 쓴다 (문서를 바꾼 직후 이전 문서의 목차가 남지 않게)
   const [toc, setToc] = useState({ slug: null, headings: [] });
   const loadedSlug = doc.data?.slug;
   const onHeadings = useCallback((headings) => setToc({ slug: loadedSlug, headings }), [loadedSlug]);
   const headings = toc.slug === current?.slug ? toc.headings : [];
+  const [activeHeading, goToHeading] = useActiveHeading(headings);
 
   if (list.loading) return <p className="docs-status">문서를 불러오는 중입니다…</p>;
   if (list.error) return <section className="placeholder-card placeholder-card--static">{list.error.message}</section>;
@@ -44,6 +47,8 @@ function TopicDocs({ topicId, docSlug }) {
       </nav>
 
       <div className="docs-main">
+        {/* 좁은 화면에서만 보이는 목차 버튼 (넓은 화면은 오른쪽 목차) */}
+        <DocTocSheet headings={headings} active={activeHeading} onSelect={goToHeading} />
         <article className="docs-article">
           {!current && <p className="docs-status">문서를 찾을 수 없습니다. 문서 목록에서 다시 고르세요.</p>}
           {current && doc.loading && <p className="docs-status">문서를 불러오는 중입니다…</p>}
@@ -72,7 +77,7 @@ function TopicDocs({ topicId, docSlug }) {
       </div>
 
       <aside className="docs-toc-col">
-        <DocToc headings={headings} />
+        <DocToc headings={headings} active={activeHeading} onSelect={goToHeading} />
       </aside>
     </div>
   );

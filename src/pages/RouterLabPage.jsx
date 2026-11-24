@@ -84,11 +84,15 @@ const GUIDE = [
   },
 ];
 
+// RouterLab.css 의 @media (max-width: 900px) 와 같은 값
+const NARROW_QUERY = '(max-width: 900px)';
+
 function RouterLabPage() {
   // 콘솔은 RouterSessionProvider 가 앱 전체에서 유지한다 (다른 페이지로 가면 PIP)
   const { active, reset, enterPip } = useRouterSession();
   const [confirmReset, setConfirmReset] = useState(false);
-  const [guideOpen, setGuideOpen] = useState(true);
+  // 좁은 화면(안내가 콘솔 아래로 가는 폭)에서는 처음에 안내를 닫아 콘솔이 화면을 다 쓰게 한다
+  const [guideOpen, setGuideOpen] = useState(() => !window.matchMedia(NARROW_QUERY).matches);
   const resetTimer = useRef(null);
 
   useEffect(() => () => clearTimeout(resetTimer.current), []);
@@ -106,7 +110,7 @@ function RouterLabPage() {
   };
 
   return (
-    <div className="router-lab">
+    <div className={`router-lab${guideOpen ? ' has-guide' : ''}`}>
       <div className="router-lab__toolbar">
         <Link to={labPath} className="router-lab__back">
           ← 실습 목록

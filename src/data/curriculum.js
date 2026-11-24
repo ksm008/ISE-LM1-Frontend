@@ -160,3 +160,10 @@ export function vulnPath(vulnId) {
 export function topicPath(topicId) {
   return `/isec/${topicId}`;
 }
+
+// 항목의 학습 문서 폴더 이름 (백엔드 docs/isec/ 아래): 항목 번호(isecTopics 순서) + id. 예) 02-vulnerability
+// 항목 순서를 바꾸면 백엔드 문서 폴더 이름도 함께 바꿔야 한다.
+export function topicDocsDir(topicId) {
+  const index = isecTopics.findIndex((t) => t.id === topicId);
+  return index === -1 ? null : `${String(index + 1).padStart(2, '0')}-${topicId}`;
+}

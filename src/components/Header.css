@@ -179,25 +179,91 @@
     left: 16px;
     right: 16px;
     min-width: 0;
+    /* 계정 줄 위에 겹쳐 뜨고, 길면 안에서 스크롤 */
+    max-height: calc(100svh - 76px);
+    overflow-y: auto;
   }
 }
 
-/* ---- 로그인 상태 (헤더 오른쪽) ---- */
+/* 아주 좁은 화면(320~420px 휴대폰): 이름을 줄이고 메뉴 간격을 좁혀 한 줄에 들어가게 한다 */
+@media (max-width: 420px) {
+  .site-header__inner {
+    padding: 0 12px;
+    gap: 6px;
+  }
+  .site-header__brand-sub {
+    display: none;
+  }
+  .site-nav {
+    gap: 2px;
+  }
+  .site-nav__link {
+    padding: 8px 6px;
+    font-size: 13px;
+  }
+  .dropdown {
+    left: 8px;
+    right: 8px;
+  }
+}
+
+/* ---- 로그인 상태 (헤더 오른쪽 / 좁은 화면에서는 헤더 아래 줄) ---- */
 .site-auth {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 14px;
+  white-space: nowrap;
+}
+
+.site-account-bar {
+  display: none;
+}
+
+/* 좁은 화면: 헤더에는 메뉴만, 계정은 아래 줄 (높이는 index.css 의 --account-bar-h 와 맞춤) */
+@media (max-width: 720px) {
+  .site-auth--header {
+    display: none;
+  }
+
+  .site-account-bar {
+    display: block;
+    height: 41px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .site-account-bar .site-auth {
+    height: 40px;
+    padding: 0 16px;
+    margin: 0;
+  }
+
+  /* 아이디는 왼쪽, 버튼은 오른쪽 */
+  .site-account-bar .site-auth__user {
+    min-width: 0;
+    margin-right: auto;
+  }
+
+  .site-account-bar .site-auth__btn {
+    padding: 4px 12px;
+  }
 }
 
 .site-auth__user {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
   color: var(--text-strong);
   font-weight: 600;
   text-decoration: none;
+}
+
+.site-auth__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .site-auth__badge {

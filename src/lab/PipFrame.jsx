@@ -15,14 +15,22 @@ const RESIZE_DIRECTIONS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), Math.max(min, max));
 
+// 휴대폰처럼 좁은 화면: 여백을 줄이고 높이를 화면의 1/3 정도로 낮춰 아래 페이지가 더 보이게 한다
+const NARROW_WIDTH = 600;
+const NARROW_MARGIN = 8;
+const NARROW_HEIGHT_RATIO = 0.33;
+
 // 화면 아래쪽 구석의 기본 위치 (corner: 'right' | 'left')
 function initialRect(corner) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const w = Math.max(MIN_WIDTH, Math.min(DEFAULT_WIDTH, vw - MARGIN * 2));
-  const h = Math.max(MIN_HEIGHT, Math.min(DEFAULT_HEIGHT, vh - MARGIN * 2));
-  const x = corner === 'left' ? MARGIN : Math.max(0, vw - w - MARGIN);
-  return { x, y: Math.max(0, vh - h - MARGIN), w, h };
+  const narrow = vw < NARROW_WIDTH;
+  const margin = narrow ? NARROW_MARGIN : MARGIN;
+  const defaultHeight = narrow ? Math.min(DEFAULT_HEIGHT, Math.round(vh * NARROW_HEIGHT_RATIO)) : DEFAULT_HEIGHT;
+  const w = Math.max(Math.min(MIN_WIDTH, vw), Math.min(DEFAULT_WIDTH, vw - margin * 2));
+  const h = Math.max(MIN_HEIGHT, Math.min(defaultHeight, vh - margin * 2));
+  const x = corner === 'left' ? margin : Math.max(0, vw - w - margin);
+  return { x, y: Math.max(0, vh - h - margin), w, h };
 }
 
 // 창 크기가 바뀌어도 PIP 가 화면 밖으로 나가지 않게 한다

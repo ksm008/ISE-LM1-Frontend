@@ -1,10 +1,10 @@
 /* ---- 라우터 설정 실습 ---- */
 
 .router-lab {
-  /* flex: 1 을 주면 높이 대신 내용 크기로 늘어나므로 높이를 고정한다 (헤더 60px + 테두리 1px) */
+  /* flex: 1 을 주면 높이 대신 내용 크기로 늘어나므로 높이를 고정한다 (헤더, 좁은 화면의 계정 줄 제외) */
   display: flex;
   flex-direction: column;
-  height: calc(100svh - 61px);
+  height: calc(100svh - var(--header-h) - var(--account-bar-h));
   min-height: 520px;
   padding: 16px;
   background: #0d1117;
@@ -145,8 +145,9 @@
   color: #8b949e;
 }
 
+/* 좁은 화면: 안내는 콘솔 아래. 안내를 열면 페이지가 길어지고(콘솔은 화면의 60%), 닫으면 콘솔이 화면을 다 쓴다 */
 @media (max-width: 900px) {
-  .router-lab {
+  .router-lab.has-guide {
     height: auto;
   }
 
@@ -154,8 +155,44 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .router-lab__console {
+  .router-lab.has-guide .router-lab__body {
+    grid-template-rows: auto;
+  }
+
+  .router-lab.has-guide .router-lab__console {
     height: 60svh;
+  }
+}
+
+@media (max-width: 600px) {
+  .router-lab {
+    min-height: 360px;
+    padding: 10px 8px 8px;
+  }
+
+  .router-lab__toolbar {
+    gap: 6px 8px;
+    margin-bottom: 8px;
+  }
+
+  .router-lab__title {
+    font-size: 16px;
+  }
+
+  .router-lab__hint {
+    display: none;
+  }
+
+  .router-lab__actions {
+    gap: 6px;
+  }
+
+  .router-lab__btn {
+    padding: 6px 10px;
+  }
+
+  .router-lab__console {
+    padding: 4px;
   }
 }
 

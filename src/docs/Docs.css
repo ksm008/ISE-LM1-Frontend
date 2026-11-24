@@ -18,8 +18,8 @@
 .docs-nav,
 .docs-toc-col {
   position: sticky;
-  top: 80px;
-  max-height: calc(100svh - 100px);
+  top: calc(var(--header-h) + 19px);
+  max-height: calc(100svh - var(--header-h) - 39px);
   overflow-y: auto;
 }
 
@@ -131,7 +131,97 @@
   color: var(--text);
 }
 
-/* 좁은 화면: 목차는 숨기고 문서 목록을 본문 위에 둔다 */
+/* 좁은 화면용 목차 버튼 막대 (넓은 화면에서는 숨김) */
+.docs-toc-bar {
+  display: none;
+}
+
+/* 목차 창 (좁은 화면, 아래에서 올라옴) */
+.docs-toc-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  animation: docs-fade 0.15s ease-out;
+}
+
+.docs-toc-sheet__panel {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 560px);
+  max-height: 75svh;
+  border-radius: 16px 16px 0 0;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding-bottom: env(safe-area-inset-bottom);
+  animation: docs-rise 0.18s ease-out;
+}
+
+.docs-toc-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 12px 8px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.docs-toc-sheet__head h2 {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 16px;
+}
+
+.docs-toc-sheet__close {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--text);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.docs-toc-sheet__close:hover {
+  background: var(--accent-soft);
+}
+
+.docs-toc--sheet {
+  overflow-y: auto;
+  padding: 10px 16px 16px;
+}
+
+/* 손가락으로 누르기 쉽게 항목을 크게 */
+.docs-toc--sheet button {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 15px;
+}
+
+.docs-toc--sheet .docs-toc__item--h4 button {
+  font-size: 14px;
+}
+
+@keyframes docs-fade {
+  from { opacity: 0; }
+}
+
+@keyframes docs-rise {
+  from { transform: translateY(24px); opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .docs-toc-sheet,
+  .docs-toc-sheet__panel {
+    animation: none;
+  }
+}
+
+/* 좁은 화면: 오른쪽 목차는 숨기고(본문 위 목차 버튼으로), 문서 목록을 본문 위에 둔다 */
 @media (max-width: 1180px) {
   .docs {
     grid-template-columns: minmax(0, 1fr);
@@ -145,6 +235,64 @@
   }
   .docs-toc-col {
     display: none;
+  }
+
+  /* 스크롤해도 헤더 바로 아래에 남는 목차 버튼 */
+  .docs-toc-bar {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 5;
+    display: block;
+    margin: 0 -4px 8px;
+    padding: 6px 4px;
+    background: var(--bg);
+  }
+
+  .docs-toc-bar__btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text-strong);
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .docs-toc-bar__btn:hover {
+    border-color: var(--accent);
+  }
+
+  .docs-toc-bar__label {
+    flex: none;
+    font-weight: 600;
+  }
+
+  /* 지금 읽는 소제목 */
+  .docs-toc-bar__current {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .docs-toc-bar__current::before {
+    content: '·';
+    margin-right: 8px;
+  }
+
+  /* 목차로 이동할 때 헤더와 목차 막대에 가리지 않게 (아래 .markdown-body 기본 규칙보다 우선) */
+  .docs-main .markdown-body h2,
+  .docs-main .markdown-body h3,
+  .docs-main .markdown-body h4 {
+    scroll-margin-top: calc(var(--header-h) + 64px);
   }
 }
 
@@ -175,7 +323,7 @@
 .markdown-body h3,
 .markdown-body h4 {
   margin: 1.8em 0 0.6em;
-  scroll-margin-top: 80px; /* 목차로 이동할 때 고정 헤더에 가리지 않게 */
+  scroll-margin-top: calc(var(--header-h) + 19px); /* 목차로 이동할 때 고정 헤더에 가리지 않게 */
   color: var(--text-strong);
   line-height: 1.35;
 }

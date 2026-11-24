@@ -20,6 +20,7 @@
   - 항목 페이지에는 백엔드의 학습 문서(Markdown)를 보여 줍니다. 본문은 페이지 가운데, 왼쪽에 문서 목록, 오른쪽에 목차(소제목 `##`·`###`·`####`, 누르면 그 위치로 스크롤하고 지금 보는 위치를 표시)가 있습니다. 화면 폭이 1180px 이하이면 목차를 숨기고 문서 목록을 본문 위에 둡니다. 이전/다음 문서로 이동할 수 있고, 문서가 없는 항목은 "준비하고 있습니다"로 표시합니다.
   - 리눅스마스터 1급: 준비 중
 - **상단 메뉴**: 정보보안기사 메뉴에 마우스를 올리면 주요 항목과 실습 메뉴를 바로 선택할 수 있습니다.
+- **모바일**: 화면 폭이 720px 이하이면 계정(아이디·로그아웃)이 헤더 아래 줄로 내려가고, 420px 이하이면 사이트 이름을 `ISE·LM1` 로 줄입니다. 문서는 본문 위 **목차** 버튼(스크롤해도 헤더 아래에 고정)을 누르면 아래에서 목차 창이 올라옵니다. 실습 화면(터미널·라우터·Wireshark)은 화면 높이에 맞춰 페이지가 스크롤되지 않고, 좁은 터미널은 글자를 12px 로 줄입니다. 라우터 실습은 좁은 화면에서 명령 안내를 닫은 채로 시작합니다.
 - **실습**
   - 터미널 실습: 실습용 컨테이너를 생성해 브라우저에서 쉘을 사용합니다.
     - 페이지에 들어오면 실습이 자동으로 시작됩니다. 실습 중에 다른 페이지로 이동하면 터미널이 자동으로 PIP 창이 되고, 실습 페이지로 돌아오면 다시 페이지에 붙습니다.
@@ -127,6 +128,7 @@ src/
 │   ├── PipFrame.jsx          # PIP 창 공통 틀 (이동, 8방향 크기 조절, 닫기) — 터미널·라우터 PIP 가 함께 사용
 │   ├── TerminalPip.jsx       # 터미널 PIP (원래 화면으로, 세션 갱신, 남은 시간, 종료)
 │   ├── SessionTimer.jsx      # 남은 세션 시간 표시
+│   ├── terminalFont.js       # 터미널 글꼴·크기 (좁으면 12px, 라우터 콘솔과 공용)
 │   └── TerminalLab.css
 ├── router/                   # 라우터 설정 실습 (IOS 스타일 시뮬레이터)
 │   ├── engine/               # 명령 트리 엔진: tree.js(kw/arg 노드), types.js(값 형식), parser.js(해석·도움말·자동 완성)
@@ -152,7 +154,8 @@ src/
 ├── config.js                 # 백엔드 주소 (VITE_API_BASE_URL)
 ├── api.js                    # REST 호출 (세션 쿠키, CSRF 헤더, 한국어 오류)
 ├── docs/                     # 학습 문서: useDocs.js(/api/docs 호출), MarkdownDoc.jsx(react-markdown + GFM 표),
-│                             # headings.js(소제목 id), DocToc.jsx(오른쪽 목차), Docs.css(목록 | 본문 | 목차 배치)
+│                             # headings.js(소제목 id), DocToc.jsx(오른쪽 목차 / 좁은 화면 목차 창), useActiveHeading.js(현재 위치),
+│                             # Docs.css(목록 | 본문 | 목차 배치)
 ├── auth/                     # AuthProvider·useAuth(로그인 상태), RequireAuth(로그인 필요 라우트),
 │                             # policy.js(아이디·비밀번호 규칙), PasswordFields, GoogleIcon, Auth.css
 └── pages/
@@ -174,7 +177,7 @@ src/
 메뉴, 메인 페이지, 항목 페이지는 모두 `src/data/curriculum.js` 의 데이터를 기준으로 그려집니다.
 
 - 정보보안기사 항목을 추가하거나 수정하려면 `isecTopics` 배열을 수정합니다.
-- 항목의 학습 문서는 프론트가 아니라 백엔드 `docs/isec/{항목 id}/` 에 `.md` 파일로 추가합니다 (백엔드 README "학습 문서").
+- 항목의 학습 문서는 프론트가 아니라 백엔드 `docs/isec/{번호}-{항목 id}/` 에 `.md` 파일로 추가합니다(예: `02-vulnerability`, 번호는 `isecTopics` 순서, `topicDocsDir`). 항목 순서를 바꾸면 백엔드 문서 폴더 이름도 바꿔야 합니다 (백엔드 README "학습 문서").
 - 리눅스마스터 1급 항목은 `exams` 배열의 `linux` 항목 `topics` 에 추가합니다.
 - 웹 취약점 실습 카테고리는 `vulnCategories` 배열(세부 유형은 `groups`)을 수정합니다.
 - 실습을 추가하려면 `labs` 배열에 항목을 추가하고, `App.jsx` 의 `/lab` 하위에 라우트를 등록합니다.
@@ -204,5 +207,7 @@ src/
 - eBPF 로그 패널을 다시 쓸 때는 SSE가 열린 뒤 WebSocket을 연결해야 초기 로그가 유실되지 않습니다 (`startLab({ deferConnect: true })`).
 
 ## 배포 시 참고
+
+`main` 에 push 하면 배포 서버가 1분 안에 받아서 `npm test` → `npm run build`(사이트 주소로 `VITE_API_BASE_URL` 지정) 후 바꿔 놓습니다. 테스트나 빌드가 실패하면 배포하지 않습니다 (백엔드 저장소 `deploy/README.md` "자동 배포").
 
 클라이언트 라우팅을 사용하므로, 웹 서버에서 존재하지 않는 경로 요청을 모두 `index.html` 로 보내도록 설정해야 합니다. 설정하지 않으면 `/lab/terminal` 같은 주소로 바로 접속하거나 새로고침할 때 404가 발생합니다.
