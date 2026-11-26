@@ -77,5 +77,11 @@ export function createShopDb(SQL) {
   db.create_function('database', () => DB_NAME);
   db.create_function('version', () => DB_VERSION);
   db.create_function('user', () => DB_USER);
+  // MySQL extractvalue(xml, xpath) 흉내: XPath 가 잘못되면 그 값을 담은 오류를 낸다 (Error-based 실습)
+  db.create_function('extractvalue', (_xml, xpath) => {
+    const path = xpath == null ? '' : String(xpath);
+    if (/^[A-Za-z0-9_/]*$/.test(path)) return null;
+    throw new Error(`XPATH syntax error: '${path.slice(0, 31)}'`);
+  });
   return db;
 }

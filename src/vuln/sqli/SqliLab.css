@@ -318,6 +318,19 @@
   text-align: center !important;
 }
 
+.shop-post {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.shop-post h3 {
+  margin: 0 0 6px;
+  color: #111827;
+  font-size: 16px;
+}
+
 /* 서버 SQL 기록 */
 .sqli-empty {
   margin: 0 0 14px;

@@ -4,6 +4,8 @@ import { ADMIN, createShopDb } from './labDb.js';
 import { errorHint, runQuery } from './query.js';
 import { FORM_MISSIONS, attemptLogin, isBypass } from './formLab.js';
 import { UNION_MISSIONS, hasInjectedRows, search } from './unionLab.js';
+import { SP_MISSIONS, findMember, leaksOthers } from './spLab.js';
+import { ERROR_MISSIONS, viewPost } from './errorLab.js';
 
 let SQL;
 let db;
@@ -143,5 +145,60 @@ describe('Union SQL 인젝션', () => {
     expect(a.error).toBeNull();
     expect(a.rows).toEqual([]);
     expect(done(UNION_MISSIONS, a)).toEqual(['safe']);
+  });
+});
+
+describe('Stored Procedure SQL 인젝션', () => {
+  it('정상 조회는 한 명', () => {
+    const a = findMember(db, '이서연');
+    expect(a.rows).toEqual([['lee', '이서연', 'lee@shop.lab']]);
+    expect(leaksOthers(a)).toBe(false);
+    expect(done(SP_MISSIONS, a)).toEqual([]);
+  });
+
+  it("' → 오류", () => {
+    expect(done(SP_MISSIONS, findMember(db, "'"))).toEqual(['error']);
+  });
+
+  it('조건 우회로 여러 회원', () => {
+    const a = findMember(db, "' OR '1'='1' --");
+    expect(a.rows.length).toBe(4);
+    expect(done(SP_MISSIONS, a)).toEqual(['bypass']);
+  });
+
+  it('보안 코딩: 같은 입력은 이름 값으로만 비교', () => {
+    const a = findMember(db, "' OR '1'='1' --", { safe: true });
+    expect(a.error).toBeNull();
+    expect(a.rows).toEqual([]);
+    expect(done(SP_MISSIONS, a)).toEqual(['safe']);
+  });
+});
+
+describe('Error-based SQL 인젝션', () => {
+  it('정상 조회', () => {
+    const a = viewPost(db, '3');
+    expect(a.rows[0][1]).toBe('사이즈 교환 문의');
+    expect(done(ERROR_MISSIONS, a)).toEqual([]);
+  });
+
+  it("1' → 오류 메시지", () => {
+    expect(done(ERROR_MISSIONS, viewPost(db, "1'"))).toEqual(['error']);
+  });
+
+  it('extractvalue 로 오류 메시지에 버전', () => {
+    const a = viewPost(db, "1 AND extractvalue(1, concat('~', version()))");
+    expect(a.error).toContain("XPATH syntax error: '~8.0.36-lab'");
+    expect(done(ERROR_MISSIONS, a)).toEqual(['error', 'dbinfo']);
+  });
+
+  it('올바른 XPath 면 오류 없음', () => {
+    expect(viewPost(db, "1 AND extractvalue(1, '/a') IS NULL").error).toBeNull();
+  });
+
+  it('보안 코딩: 숫자 바인딩은 조회되고 공격 입력은 결과 없음', () => {
+    expect(viewPost(db, '3', { safe: true }).rows.length).toBe(1);
+    const a = viewPost(db, "1 AND extractvalue(1, concat('~', version()))", { safe: true });
+    expect(a.error).toBeNull();
+    expect(done(ERROR_MISSIONS, a)).toEqual(['safe']);
   });
 });

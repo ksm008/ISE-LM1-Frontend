@@ -5,4 +5,6 @@ import { lazy } from 'react';
 export const vulnLabComponents = {
   'sql-injection/form': lazy(() => import('./sqli/FormSqliLab.jsx')),
   'sql-injection/union': lazy(() => import('./sqli/UnionSqliLab.jsx')),
+  'sql-injection/stored-procedure': lazy(() => import('./sqli/SpSqliLab.jsx')),
+  'sql-injection/error-based': lazy(() => import('./sqli/ErrorSqliLab.jsx')),
 };

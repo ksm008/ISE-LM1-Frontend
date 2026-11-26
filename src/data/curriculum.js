@@ -94,11 +94,21 @@ export const vulnCategories = [
         items: [
           { title: 'Form SQL 인젝션', lab: 'form', summary: '로그인 폼에 SQL 을 넣어 인증을 우회합니다.' },
           { title: 'Union SQL 인젝션', lab: 'union', summary: '게시판 검색에 UNION SELECT 를 넣어 다른 테이블을 읽습니다.' },
-          'Stored Procedure SQL 인젝션',
+          {
+            title: 'Stored Procedure SQL 인젝션',
+            lab: 'stored-procedure',
+            summary: '저장 프로시저 안의 동적 SQL 이 왜 취약한지 확인합니다.',
+          },
           'Mass SQL 인젝션',
         ],
       },
-      { label: '공격 유형', items: ['Error-based SQL 인젝션', 'Blind SQL 인젝션'] },
+      {
+        label: '공격 유형',
+        items: [
+          { title: 'Error-based SQL 인젝션', lab: 'error-based', summary: '화면에 보이는 DB 오류 메시지로 정보를 알아냅니다.' },
+          'Blind SQL 인젝션',
+        ],
+      },
     ],
   },
   {
