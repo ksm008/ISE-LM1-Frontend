@@ -58,7 +58,7 @@
 | 빌드 도구 | Vite 8 |
 | 라우팅 | React Router 8 |
 | 터미널 | xterm.js (`@xterm/xterm`, `@xterm/addon-fit`) |
-| 문서 | react-markdown, remark-gfm (HTML 태그는 실행하지 않음) |
+| 문서 | react-markdown, remark-gfm (HTML 태그는 실행하지 않음), 수식은 remark-math + rehype-katex + KaTeX (문서 페이지를 열 때만 불러옴) |
 | SQL 인젝션 실습 DB | sql.js 1.15.2 (SQLite WASM, 실습 페이지를 열 때만 불러옴) |
 | 린트 | oxlint |
 
@@ -176,7 +176,7 @@ src/
 │   └── Wireshark.css
 ├── config.js                 # 백엔드 주소 (VITE_API_BASE_URL)
 ├── api.js                    # REST 호출 (세션 쿠키, CSRF 헤더, 한국어 오류)
-├── docs/                     # 학습 문서: useDocs.js(/api/docs 호출), MarkdownDoc.jsx(react-markdown + GFM 표),
+├── docs/                     # 학습 문서: useDocs.js(/api/docs 호출), MarkdownDoc.jsx(react-markdown + GFM 표 + KaTeX 수식, TopicPage 에서 lazy),
 │                             # headings.js(소제목 id), DocToc.jsx(오른쪽 목차 / 좁은 화면 목차 창), useActiveHeading.js(현재 위치),
 │                             # Docs.css(목록 | 본문 | 목차 배치)
 ├── auth/                     # AuthProvider·useAuth(로그인 상태), RequireAuth(로그인 필요 라우트),

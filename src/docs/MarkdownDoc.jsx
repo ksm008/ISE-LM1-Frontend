@@ -1,6 +1,9 @@
 import { useLayoutEffect, useRef } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { readHeadings, remarkHeadingIds } from './headings.js';
 import './Docs.css';
 
@@ -16,7 +19,9 @@ const components = {
   },
 };
 
-const remarkPlugins = [remarkGfm, remarkHeadingIds];
+// 수식: $...$ (문장 안), $$...$$ (별도 줄) 을 KaTeX 로 표시한다
+const remarkPlugins = [remarkGfm, remarkMath, remarkHeadingIds];
+const rehypePlugins = [rehypeKatex];
 
 // onHeadings: 본문을 그린 뒤 소제목(##~####) 목록 [{id, level, text}] 을 알려 준다 (목차용)
 function MarkdownDoc({ markdown, onHeadings }) {
@@ -28,7 +33,7 @@ function MarkdownDoc({ markdown, onHeadings }) {
 
   return (
     <div className="markdown-body" ref={ref}>
-      <Markdown remarkPlugins={remarkPlugins} components={components}>
+      <Markdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={components}>
         {markdown}
       </Markdown>
     </div>

@@ -426,3 +426,15 @@
 .markdown-body img {
   max-width: 100%;
 }
+
+/* 수식 (KaTeX): 긴 수식은 좁은 화면에서 가로 스크롤 */
+.markdown-body .katex-display {
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+}
+
+.markdown-body .katex {
+  font-size: 1.08em;
+}

@@ -1,8 +1,9 @@
-import { useCallback, useState } from 'react';
+import { Suspense, lazy, useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { isecTopics, labPath, topicDocsDir, topicPath } from '../data/curriculum.js';
 import { useDoc, useDocList } from '../docs/useDocs.js';
-import MarkdownDoc from '../docs/MarkdownDoc.jsx';
+// 문서 표시(react-markdown, KaTeX 수식)는 문서 페이지를 열 때만 불러온다
+const MarkdownDoc = lazy(() => import('../docs/MarkdownDoc.jsx'));
 import { DocToc, DocTocSheet } from '../docs/DocToc.jsx';
 import { useActiveHeading } from '../docs/useActiveHeading.js';
 import NotFoundPage from './NotFoundPage.jsx';
@@ -53,7 +54,11 @@ function TopicDocs({ topicId, docSlug }) {
           {!current && <p className="docs-status">문서를 찾을 수 없습니다. 문서 목록에서 다시 고르세요.</p>}
           {current && doc.loading && <p className="docs-status">문서를 불러오는 중입니다…</p>}
           {current && doc.error && <p className="docs-status">{doc.error.message}</p>}
-          {doc.data && <MarkdownDoc markdown={doc.data.markdown} onHeadings={onHeadings} />}
+          {doc.data && (
+            <Suspense fallback={<p className="docs-status">문서를 표시하는 중…</p>}>
+              <MarkdownDoc markdown={doc.data.markdown} onHeadings={onHeadings} />
+            </Suspense>
+          )}
         </article>
 
         {current && (prev || next) && (
