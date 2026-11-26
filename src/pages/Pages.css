@@ -350,3 +350,80 @@ a.placeholder-card:hover {
 .vuln-lab-loading {
   color: var(--text);
 }
+
+/* ---------- 메인: 로그인 후 학습 5열 / 실습 4열 ---------- */
+.home-grid {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-grid > li {
+  display: flex;
+}
+
+.home-grid--topics {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.home-grid--labs {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.home-grid .topic-card {
+  padding: 18px;
+  word-break: keep-all; /* 한글 낱말 중간에서 줄바꿈하지 않음 */
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1000px) {
+  .home-grid--topics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .home-grid--labs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .home-grid--topics,
+  .home-grid--labs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- 메인: 로그인 전 소개 ---------- */
+.overview-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.overview-item {
+  word-break: keep-all;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.overview-item strong {
+  color: var(--text-strong);
+  font-size: 16px;
+}
+
+@media (max-width: 760px) {
+  .overview-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

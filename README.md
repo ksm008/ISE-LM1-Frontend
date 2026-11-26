@@ -99,7 +99,7 @@ VITE_API_BASE_URL=http://localhost:8080
 
 | 경로 | 페이지 |
 |---|---|
-| `/` | 메인 페이지 (로그인 전에는 미리 보기) |
+| `/` | 메인 페이지 (로그인 전: 무엇을 담고 있는지 간단한 소개만 / 로그인 후: 학습 항목 5개 한 줄, 실습 4개 한 줄) |
 | `/login`, `/signup` | 로그인, 회원가입 (누구나) |
 | `/signup/google` | 연동 계정이 없는 구글 계정으로 가입 (누구나) |
 | `/verify-email` | 이메일 인증번호 입력 (로그인, 인증 전) |
@@ -182,7 +182,7 @@ src/
 ├── auth/                     # AuthProvider·useAuth(로그인 상태), RequireAuth(로그인 필요 라우트),
 │                             # policy.js(아이디·비밀번호 규칙), PasswordFields, GoogleIcon, Auth.css
 └── pages/
-    ├── HomePage.jsx          # 메인 페이지
+    ├── HomePage.jsx          # 메인 페이지 (GuestOverview / MemberContent, 로그인 확인 전에는 비워 둠)
     ├── TopicPage.jsx         # 정보보안기사 항목 페이지 (학습 문서 목록·본문)
     ├── LinuxMasterPage.jsx   # 리눅스마스터 1급 페이지
     ├── LabHubPage.jsx        # 실습 목록

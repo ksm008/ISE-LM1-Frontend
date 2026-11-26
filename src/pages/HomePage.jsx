@@ -57,13 +57,57 @@ function HomePage() {
         </div>
       </section>
 
+      {/* 로그인 상태를 확인하는 동안은 비워 둔다 (미리 보기 화면이 잠깐 보였다 바뀌지 않게) */}
+      {me && (me.active ? <MemberContent /> : <GuestOverview />)}
+    </div>
+  );
+}
+
+// 로그인 전: 항목 이름은 보여 주지 않고 무엇을 담고 있는지만 간단히 알린다
+const OVERVIEW = [
+  {
+    title: '정보보안기사 학습 문서',
+    desc: '시험 범위를 다섯 개 영역으로 나눠 정리한 학습 문서를 제공합니다.',
+  },
+  {
+    title: '브라우저에서 하는 보안 실습',
+    desc: '실제 리눅스 환경과 시뮬레이터로 명령어, 패킷 분석, 장비 설정, 웹 취약점을 직접 다뤄 봅니다.',
+  },
+  {
+    title: '리눅스마스터 1급',
+    desc: '시험 범위 학습 자료를 준비하고 있습니다.',
+  },
+];
+
+function GuestOverview() {
+  return (
+    <section className="section">
+      <div className="section__head">
+        <h2>무엇을 담고 있나요</h2>
+        <p>로그인하면 모든 학습 문서와 실습을 이용할 수 있습니다.</p>
+      </div>
+      <ul className="overview-list">
+        {OVERVIEW.map((item) => (
+          <li key={item.title} className="overview-item">
+            <strong>{item.title}</strong>
+            <span>{item.desc}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+// 로그인 후: 학습 항목 5개 한 줄, 실습 4개 한 줄
+function MemberContent() {
+  return (
+    <>
       <section className="section">
         <div className="section__head">
-          <h2>정보보안기사 주요 항목</h2>
-          <p>다섯 개 항목을 차례로 학습한 뒤 터미널과 Wireshark로 직접 실습해 보세요.</p>
+          <h2>정보보안기사 학습</h2>
+          <p>다섯 개 영역의 학습 문서를 차례로 읽어 보세요.</p>
         </div>
-
-        <ol className="topic-grid">
+        <ol className="home-grid home-grid--topics">
           {isecTopics.map((topic, idx) => (
             <li key={topic.id}>
               <Link to={topicPath(topic.id)} className="topic-card">
@@ -73,6 +117,15 @@ function HomePage() {
               </Link>
             </li>
           ))}
+        </ol>
+      </section>
+
+      <section className="section">
+        <div className="section__head">
+          <h2>실습</h2>
+          <p>터미널, 패킷 분석, 라우터 설정, 웹 취약점을 직접 다뤄 보세요.</p>
+        </div>
+        <ul className="home-grid home-grid--labs">
           {labs.map((lab) => (
             <li key={lab.id}>
               <Link to={lab.path} className="topic-card topic-card--lab">
@@ -82,7 +135,7 @@ function HomePage() {
               </Link>
             </li>
           ))}
-        </ol>
+        </ul>
       </section>
 
       <section className="section">
@@ -94,7 +147,7 @@ function HomePage() {
           리눅스마스터 1급 페이지로 이동 →
         </Link>
       </section>
-    </div>
+    </>
   );
 }
 
