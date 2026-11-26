@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { labPath, labs, vulnCategories, vulnPath } from '../data/curriculum.js';
+import { labPath, labs, vulnCategories, vulnItem, vulnPath } from '../data/curriculum.js';
 import './Pages.css';
 
 const lab = labs.find((l) => l.id === 'vuln');
@@ -30,11 +30,14 @@ function VulnLabPage() {
               <span className="topic-card__summary">{vuln.summary}</span>
               {vuln.groups && (
                 <span className="vuln-tags">
-                  {vuln.groups.flatMap((g) => g.items).map((item) => (
-                    <span key={item} className="vuln-tag">
-                      {item}
-                    </span>
-                  ))}
+                  {vuln.groups
+                    .flatMap((g) => g.items)
+                    .map(vulnItem)
+                    .map((item) => (
+                      <span key={item.title} className={`vuln-tag${item.lab ? ' vuln-tag--ready' : ''}`}>
+                        {item.title}
+                      </span>
+                    ))}
                 </span>
               )}
             </Link>

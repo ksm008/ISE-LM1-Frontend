@@ -1,0 +1,601 @@
+/* ---------- SQL 인젝션 실습 ---------- */
+.sqli-lab {
+  --sqli-input: #c2410c;
+  --sqli-input-bg: rgba(234, 88, 12, 0.14);
+  --sqli-ok: #15803d;
+  --sqli-ok-bg: rgba(22, 163, 74, 0.12);
+  --sqli-err: #b91c1c;
+  --sqli-err-bg: rgba(220, 38, 38, 0.08);
+  --sqli-code-bg: #0f1117;
+  --sqli-code-text: #d7dae3;
+  --shop-bg: #ffffff;
+  --shop-text: #1f2328;
+  --shop-muted: #6b7280;
+  --shop-border: #d9dce1;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .sqli-lab {
+    --sqli-input: #fdba74;
+    --sqli-input-bg: rgba(251, 146, 60, 0.18);
+    --sqli-ok: #4ade80;
+    --sqli-ok-bg: rgba(74, 222, 128, 0.12);
+    --sqli-err: #fca5a5;
+    --sqli-err-bg: rgba(248, 113, 113, 0.1);
+    --sqli-code-bg: #0b0c10;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.sqli-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.sqli-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-strong);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sqli-toggle--on {
+  border-color: var(--sqli-ok);
+  background: var(--sqli-ok-bg);
+  color: var(--sqli-ok);
+}
+
+.sqli-toggle input {
+  accent-color: var(--sqli-ok);
+}
+
+.sqli-progress {
+  color: var(--text-strong);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sqli-reset {
+  margin-left: auto;
+  padding: 7px 14px;
+  font-size: 14px;
+}
+
+.sqli-load-error {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--sqli-err-bg);
+  color: var(--sqli-err);
+}
+
+.sqli-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.sqli-panel {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.sqli-panel__title {
+  margin: 0 0 12px;
+  color: var(--text-strong);
+  font-size: 15px;
+}
+
+/* 가짜 브라우저 창 */
+.sqli-browser {
+  overflow: hidden;
+  border: 1px solid var(--shop-border);
+  border-radius: 10px;
+  background: var(--shop-bg);
+  color: var(--shop-text);
+  color-scheme: light;
+}
+
+.sqli-browser__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--shop-border);
+  background: #f1f3f5;
+}
+
+.sqli-browser__dots {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.sqli-browser__dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #c9ccd1;
+}
+
+.sqli-browser__url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fff;
+  color: #4b5563;
+  font: 12px/1.6 var(--mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sqli-browser__body {
+  padding: 20px;
+}
+
+.shop-logo {
+  margin-bottom: 14px;
+  color: #111827;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.shop-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.shop-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.shop-form input,
+.shop-search input {
+  padding: 9px 11px;
+  border: 1px solid var(--shop-border);
+  border-radius: 6px;
+  background: #fff;
+  color: #111827;
+  font: 14px var(--mono);
+}
+
+.shop-form input:focus,
+.shop-search input:focus {
+  outline: 2px solid #4f46e5;
+  outline-offset: -1px;
+}
+
+.shop-form .btn {
+  justify-content: center;
+}
+
+.sqli-browser .btn {
+  border-color: var(--shop-border);
+  background: #fff;
+  color: #111827;
+}
+
+.sqli-browser .btn--primary {
+  border-color: #4f46e5;
+  background: #4f46e5;
+  color: #fff;
+}
+
+.sqli-browser .btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.shop-form__note {
+  font-size: 12px;
+}
+
+.shop-msg {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+.shop-msg--error {
+  padding: 10px;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fef2f2;
+  font: 12px/1.5 var(--mono);
+  overflow-wrap: anywhere;
+}
+
+.shop-muted {
+  margin: 0;
+  color: var(--shop-muted);
+  font-size: 13px;
+}
+
+.shop-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.shop-welcome__hello {
+  margin: 0;
+  font-size: 16px;
+}
+
+.shop-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 13px;
+}
+
+.shop-search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.shop-search input {
+  flex: 1;
+  min-width: 0;
+}
+
+.shop-table-wrap {
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+.shop-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.shop-table th,
+.shop-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.shop-table th {
+  background: #f9fafb;
+  color: #374151;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.shop-table td:first-child {
+  width: 3.5em;
+  color: var(--shop-muted);
+}
+
+.shop-table__empty {
+  color: var(--shop-muted);
+  text-align: center !important;
+}
+
+/* 서버 SQL 기록 */
+.sqli-empty {
+  margin: 0 0 14px;
+  font-size: 14px;
+}
+
+.sqli-log {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.sqli-log__entry {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--sqli-code-bg);
+  color: var(--sqli-code-text);
+}
+
+.sqli-log__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: #9aa0ad;
+  font-size: 12px;
+}
+
+.sqli-badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(251, 146, 60, 0.2);
+  color: #fdba74;
+  font-weight: 700;
+}
+
+.sqli-badge--safe {
+  background: rgba(74, 222, 128, 0.18);
+  color: #86efac;
+}
+
+.sqli-log__err {
+  color: #fca5a5;
+  font-weight: 700;
+}
+
+.sqli-sql {
+  font: 13px/1.6 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sqli-sql__input {
+  padding: 1px 0;
+  border-radius: 3px;
+  background: rgba(251, 146, 60, 0.28);
+  color: #ffd7b0;
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.5);
+}
+
+.sqli-log__params {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #9aa0ad;
+  font-size: 12px;
+}
+
+.sqli-log__params code {
+  padding: 0 6px;
+  border-radius: 4px;
+  background: rgba(74, 222, 128, 0.15);
+  color: #bbf7d0;
+  font: 12px/1.6 var(--mono);
+  overflow-wrap: anywhere;
+}
+
+.sqli-log__error {
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(248, 113, 113, 0.12);
+  color: #fecaca;
+  font: 12px/1.5 var(--mono);
+  overflow-wrap: anywhere;
+}
+
+.sqli-log__hint {
+  margin-top: 4px;
+  color: #fde68a;
+  font-family: var(--sans);
+}
+
+.sqli-log__older {
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.sqli-log__older summary {
+  margin-bottom: 8px;
+  color: var(--text-strong);
+  cursor: pointer;
+}
+
+.sqli-log__older .sqli-log__entry {
+  opacity: 0.8;
+}
+
+/* 서버 코드 */
+.sqli-code__label {
+  margin-bottom: 6px;
+  color: var(--text-strong);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sqli-code pre {
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+  border-radius: 8px;
+  background: var(--sqli-code-bg);
+  color: var(--sqli-code-text);
+  font: 12px/1.6 var(--mono);
+}
+
+/* 미션 */
+.sqli-missions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sqli-mission {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.sqli-mission--done {
+  border-color: var(--sqli-ok);
+  background: var(--sqli-ok-bg);
+}
+
+.sqli-mission--new {
+  animation: sqli-pop 0.6s ease-out;
+}
+
+@keyframes sqli-pop {
+  0% {
+    transform: scale(0.98);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sqli-mission--new {
+    animation: none;
+  }
+}
+
+.sqli-mission__head {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.sqli-mission__check {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sqli-mission--done .sqli-mission__check {
+  border-color: var(--sqli-ok);
+  background: var(--sqli-ok);
+  color: #fff;
+}
+
+.sqli-mission__title {
+  color: var(--text-strong);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sqli-mission__hint {
+  padding-left: 34px;
+  font-size: 13px;
+}
+
+.sqli-mission__hint summary {
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.sqli-mission__hint p {
+  margin: 6px 0;
+}
+
+.sqli-mission__hint code {
+  display: block;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--sqli-input-bg);
+  color: var(--sqli-input);
+  font: 12px/1.5 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* 정리 */
+.sqli-notes {
+  padding: 4px 4px 0;
+  font-size: 14px;
+}
+
+.sqli-notes h2 {
+  margin: 0 0 8px;
+  color: var(--text-strong);
+  font-size: 16px;
+}
+
+.sqli-notes ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.sqli-notes li + li {
+  margin-top: 6px;
+}
+
+.sqli-notes code {
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--text-strong);
+  font: 13px var(--mono);
+}
+
+@media (max-width: 900px) {
+  .sqli-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .sqli-browser__body {
+    padding: 14px;
+  }
+  .sqli-missions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sqli-reset {
+    margin-left: 0;
+  }
+}

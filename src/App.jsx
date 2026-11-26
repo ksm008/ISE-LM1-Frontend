@@ -8,6 +8,7 @@ import TerminalLabPage from './pages/TerminalLabPage.jsx';
 import WiresharkLabPage from './pages/WiresharkLabPage.jsx';
 import VulnLabPage from './pages/VulnLabPage.jsx';
 import VulnCategoryPage from './pages/VulnCategoryPage.jsx';
+import VulnPracticePage from './pages/VulnPracticePage.jsx';
 import RouterLabPage from './pages/RouterLabPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
@@ -64,6 +65,7 @@ function App() {
             <Route path="router" element={<RouterLabPage />} />
             <Route path="vuln" element={<VulnLabPage />} />
             <Route path="vuln/:vulnId" element={<VulnCategoryPage />} />
+            <Route path="vuln/:vulnId/:labId" element={<VulnPracticePage />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Route>

@@ -1,9 +1,9 @@
 import { Link, useParams } from 'react-router';
-import { labPath, vulnCategories, vulnLabPath, vulnPath } from '../data/curriculum.js';
+import { labPath, vulnCategories, vulnItem, vulnItemPath, vulnLabPath, vulnPath } from '../data/curriculum.js';
 import NotFoundPage from './NotFoundPage.jsx';
 import './Pages.css';
 
-// 웹 취약점 실습: 카테고리 페이지 (실습 내용은 추후 구성)
+// 웹 취약점 실습: 카테고리 페이지 (세부 항목 중 lab 이 있는 것은 실습 페이지로 연결)
 function VulnCategoryPage() {
   const { vulnId } = useParams();
   const index = vulnCategories.findIndex((v) => v.id === vulnId);
@@ -36,12 +36,20 @@ function VulnCategoryPage() {
         <section key={group.label} className="vuln-group">
           <h2>{group.label}</h2>
           <ul className="topic-grid">
-            {group.items.map((item) => (
-              <li key={item}>
-                <div className="placeholder-card vuln-group__item">
-                  <strong>{item}</strong>
-                  <span>실습 내용을 준비하고 있습니다.</span>
-                </div>
+            {group.items.map(vulnItem).map((item) => (
+              <li key={item.title}>
+                {item.lab ? (
+                  <Link to={vulnItemPath(vuln.id, item.lab)} className="topic-card vuln-group__item">
+                    <strong>{item.title}</strong>
+                    <span>{item.summary}</span>
+                    <span className="vuln-group__go">실습하기 →</span>
+                  </Link>
+                ) : (
+                  <div className="placeholder-card vuln-group__item">
+                    <strong>{item.title}</strong>
+                    <span>실습 내용을 준비하고 있습니다.</span>
+                  </div>
+                )}
               </li>
             ))}
           </ul>

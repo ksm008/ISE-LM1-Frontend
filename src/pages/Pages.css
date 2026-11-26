@@ -292,3 +292,66 @@ a.placeholder-card:hover {
 .vuln-group__item span {
   font-size: 13px;
 }
+
+.vuln-group__item .vuln-group__go {
+  margin-top: auto;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* 실습이 준비된 항목 태그 */
+.vuln-tag--ready {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* ---------- 웹 취약점 세부 실습 (VulnPracticePage) ---------- */
+.page--wide {
+  max-width: 1320px;
+}
+
+.topic-header--compact {
+  margin-bottom: 18px;
+}
+
+.topic-header--compact p {
+  font-size: 15px;
+}
+
+.vuln-lab-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.vuln-lab-tab {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.vuln-lab-tab:hover {
+  border-color: var(--accent);
+  color: var(--text-strong);
+}
+
+.vuln-lab-tab--active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.vuln-lab-tab--active:hover {
+  color: var(--on-accent);
+}
+
+.vuln-lab-loading {
+  color: var(--text);
+}

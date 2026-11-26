@@ -90,7 +90,13 @@ export const vulnCategories = [
     groups: [
       {
         label: '공격 기법',
-        items: ['Form SQL 인젝션', 'Union SQL 인젝션', 'Stored Procedure SQL 인젝션', 'Mass SQL 인젝션'],
+        // lab 이 있으면 실습 페이지로 연결 (src/vuln/registry.js)
+        items: [
+          { title: 'Form SQL 인젝션', lab: 'form', summary: '로그인 폼에 SQL 을 넣어 인증을 우회합니다.' },
+          { title: 'Union SQL 인젝션', lab: 'union', summary: '게시판 검색에 UNION SELECT 를 넣어 다른 테이블을 읽습니다.' },
+          'Stored Procedure SQL 인젝션',
+          'Mass SQL 인젝션',
+        ],
       },
       { label: '공격 유형', items: ['Error-based SQL 인젝션', 'Blind SQL 인젝션'] },
     ],
@@ -155,6 +161,25 @@ export const vulnCategories = [
 
 export function vulnPath(vulnId) {
   return `${vulnLabPath}/${vulnId}`;
+}
+
+/** 취약점 세부 항목: 문자열(준비 중) 또는 { title, lab, summary } (실습 있음) */
+export function vulnItem(item) {
+  return typeof item === 'string' ? { title: item } : item;
+}
+
+export function vulnItemPath(vulnId, labId) {
+  return `${vulnPath(vulnId)}/${labId}`;
+}
+
+/** 실습이 있는 세부 항목 찾기 */
+export function findVulnLab(vulnId, labId) {
+  const vuln = vulnCategories.find((v) => v.id === vulnId);
+  const item = vuln?.groups
+    ?.flatMap((g) => g.items)
+    .map(vulnItem)
+    .find((i) => i.lab === labId);
+  return item ? { vuln, item } : null;
 }
 
 export function topicPath(topicId) {

@@ -30,7 +30,12 @@
     - 새 실습을 시작하면 터미널 화면이 초기화됩니다.
     - 우클릭: 선택한 글자가 있으면 복사, 없으면 붙여넣기 (Windows Terminal·PuTTY 방식). 브라우저가 처음 한 번 클립보드 권한을 묻습니다. HTTPS 또는 localhost 에서만 동작합니다.
     - eBPF 모니터링 로그 패널은 현재 비활성화되어 있습니다 (`src/pages/TerminalLabPage.jsx` 주석 참고).
-  - 웹 취약점 실습: SQL 인젝션(Form, Union, Stored Procedure, Mass / Error-based, Blind), XSS(Stored, Reflected, DOM based), CSRF, SSRF, 운영체제 명령어 실행, 파일 업로드·다운로드, 경로 추적, 파일 삽입, URL/파라미터 변조, 불충분한 세션 관리, 정보누출 카테고리 (실습 내용은 준비 중)
+  - 웹 취약점 실습: SQL 인젝션(Form, Union, Stored Procedure, Mass / Error-based, Blind), XSS(Stored, Reflected, DOM based), CSRF, SSRF, 운영체제 명령어 실행, 파일 업로드·다운로드, 경로 추적, 파일 삽입, URL/파라미터 변조, 불충분한 세션 관리, 정보누출 카테고리
+    - **SQL 인젝션 실습**(Form, Union): 브라우저 안 SQLite(sql.js, WASM)로 만든 실습용 쇼핑몰 DB 에 취약한 로그인 폼·게시판 검색을 흉내 냅니다. 서버로 보내지 않고, 새로고침하면 처음 상태입니다.
+      - 왼쪽은 취약한 웹 페이지(가짜 브라우저 창, SQL 오류를 그대로 보여 줌), 오른쪽은 서버가 실행한 SQL(사용자 입력 부분 강조)과 PHP 코드.
+      - 미션(힌트·예시 입력): Form 은 오류 확인 → 인증 우회 → 관리자 로그인, Union 은 오류 확인 → 컬럼 수 → DB 정보 → 테이블 → 컬럼 → 관리자 비밀번호. "보안 코딩 적용"을 켜면 Prepared Statement(바인딩 값 표시)로 같은 공격이 막히는지 확인합니다.
+      - MySQL 흐름을 따라 할 수 있게 `information_schema`(tables, columns, schemata)와 `database()`, `version()`, `user()` 를 흉내 냅니다. `#` 주석은 안 되고 `--` 를 씁니다(오류에 안내). 한 번에 한 문장만 실행합니다(`;` 로 이어 붙인 문장 거부).
+    - 나머지 항목은 준비 중
   - 라우터 설정 실습: IOS 스타일 명령을 쓰는 라우터 시뮬레이터 (브라우저 안에서 동작, 서버 자원 없음)
     - 모드 전환(`Router>` → `#` → `(config)#` → `(config-if)#` / `(config-line)#`), 줄임말(`conf t`, `int g0/0`), `?` 즉시 도움말, Tab 자동 완성, ↑↓ 명령 기록, `no`·`do`, `% Invalid input detected at '^' marker.` 오류 위치 표시, `| include/exclude/begin/section` 출력 필터
     - 1단계 범위: enable secret(type 5)·enable password·service password-encryption(type 7)·security passwords min-length, username, console/vty 라인(password, login, login local, exec-timeout, transport input, access-class), SSH(hostname, ip domain-name, crypto key generate rsa, ip ssh version), 불필요한 서비스 끄기(http server, cdp, source-route, small-servers, bootp, finger, domain lookup, 인터페이스의 directed-broadcast 등), banner motd, 인터페이스 IP·shutdown
@@ -54,6 +59,7 @@
 | 라우팅 | React Router 8 |
 | 터미널 | xterm.js (`@xterm/xterm`, `@xterm/addon-fit`) |
 | 문서 | react-markdown, remark-gfm (HTML 태그는 실행하지 않음) |
+| SQL 인젝션 실습 DB | sql.js 1.15.2 (SQLite WASM, 실습 페이지를 열 때만 불러옴) |
 | 린트 | oxlint |
 
 ## 시작하기
@@ -73,7 +79,7 @@ npm run dev
 | `npm run build` | 프로덕션 빌드 (`dist/` 생성) |
 | `npm run preview` | 빌드 결과 미리보기 |
 | `npm run lint` | oxlint 실행 |
-| `npm test` | 단위 테스트 (Vitest, 라우터 시뮬레이터 엔진) |
+| `npm test` | 단위 테스트 (Vitest, 라우터 시뮬레이터 엔진, SQL 인젝션 실습) |
 
 ### 환경 변수
 
@@ -107,6 +113,7 @@ VITE_API_BASE_URL=http://localhost:8080
 | `/lab/router` | 라우터 설정 실습 |
 | `/lab/vuln` | 웹 취약점 실습 (카테고리 목록) |
 | `/lab/vuln/:vulnId` | 웹 취약점 카테고리 페이지 |
+| `/lab/vuln/:vulnId/:labId` | 웹 취약점 세부 실습 (`sql-injection/form`, `sql-injection/union`) |
 
 ## 프로젝트 구조
 
@@ -141,6 +148,19 @@ src/
 │   ├── RouterPip.jsx         # 라우터 PIP (원래 화면으로, 라우터 끄기)
 │   ├── *.test.js             # Vitest 단위 테스트
 │   └── RouterLab.css
+├── vuln/                     # 웹 취약점 실습
+│   ├── registry.js           # `취약점/실습` → 화면 (lazy, 실습마다 따로 불러옴)
+│   └── sqli/                 # SQL 인젝션 (브라우저 안 SQLite)
+│       ├── labDb.js          # 실습 DB (members, posts, information_schema 흉내, database() 등)
+│       ├── query.js          # 한 문장만 실행, 결과 행 수 제한, SQLite·MySQL 차이 안내
+│       ├── formLab.js        # 로그인 SQL·인증 우회 판정·미션
+│       ├── unionLab.js       # 게시판 검색 SQL·UNION 판정·미션
+│       ├── sqlJs.js          # sql.js(WASM) 불러오기
+│       ├── useSqliLab.js     # DB 준비·미션 진행 훅
+│       ├── SqliLabParts.jsx  # 가짜 브라우저 창, SQL 기록, 미션 목록, 서버 코드, 전체 틀
+│       ├── FormSqliLab.jsx / UnionSqliLab.jsx
+│       ├── sqli.test.js      # 실제 공격 입력으로 시험
+│       └── SqliLab.css
 ├── wireshark/
 │   ├── useCapture.js         # 캡처 WebSocket 연결과 패킷 저장
 │   ├── dissect.js            # 패킷 해석기 (프로토콜별 상세 트리, 목록 요약, 필터 필드)
@@ -167,7 +187,8 @@ src/
     ├── WiresharkLabPage.jsx  # Wireshark 실습
     ├── RouterLabPage.jsx     # 라우터 설정 실습 (콘솔 + 명령 안내, 초기화)
     ├── VulnLabPage.jsx       # 웹 취약점 실습 카테고리 목록
-    ├── VulnCategoryPage.jsx  # 웹 취약점 카테고리 (실습 내용은 추후 구성)
+    ├── VulnCategoryPage.jsx  # 웹 취약점 카테고리 (실습 있는 항목은 실습 페이지로 연결)
+    ├── VulnPracticePage.jsx  # 웹 취약점 세부 실습 (같은 취약점 실습 탭, vuln/registry.js 화면)
     ├── NotFoundPage.jsx      # 404
     └── Pages.css
 ```
@@ -179,7 +200,7 @@ src/
 - 정보보안기사 항목을 추가하거나 수정하려면 `isecTopics` 배열을 수정합니다.
 - 항목의 학습 문서는 프론트가 아니라 백엔드 `docs/isec/{번호}-{항목 id}/` 에 `.md` 파일로 추가합니다(예: `02-vulnerability`, 번호는 `isecTopics` 순서, `topicDocsDir`). 항목 순서를 바꾸면 백엔드 문서 폴더 이름도 바꿔야 합니다 (백엔드 README "학습 문서").
 - 리눅스마스터 1급 항목은 `exams` 배열의 `linux` 항목 `topics` 에 추가합니다.
-- 웹 취약점 실습 카테고리는 `vulnCategories` 배열(세부 유형은 `groups`)을 수정합니다.
+- 웹 취약점 실습 카테고리는 `vulnCategories` 배열(세부 유형은 `groups`)을 수정합니다. 세부 항목에 실습을 붙이려면 항목을 `{ title, lab, summary }` 로 바꾸고 `src/vuln/registry.js` 에 `'취약점id/lab'` 화면을 등록합니다.
 - 실습을 추가하려면 `labs` 배열에 항목을 추가하고, `App.jsx` 의 `/lab` 하위에 라우트를 등록합니다.
 
 ## 백엔드 연동
