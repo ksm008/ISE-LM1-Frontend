@@ -236,11 +236,6 @@ a.placeholder-card:hover {
   align-items: flex-end;
 }
 
-.pager__link--lab {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
 @media (max-width: 600px) {
   .page {
     padding-top: 24px;

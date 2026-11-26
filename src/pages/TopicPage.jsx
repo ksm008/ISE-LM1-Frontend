@@ -1,6 +1,6 @@
 import { Suspense, lazy, useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { isecTopics, labPath, topicDocsDir, topicPath } from '../data/curriculum.js';
+import { isecTopics, topicDocsDir, topicPath } from '../data/curriculum.js';
 import { useDoc, useDocList } from '../docs/useDocs.js';
 // 문서 표시(react-markdown, KaTeX 수식)는 문서 페이지를 열 때만 불러온다
 const MarkdownDoc = lazy(() => import('../docs/MarkdownDoc.jsx'));
@@ -32,9 +32,6 @@ function TopicDocs({ topicId, docSlug }) {
     return <section className="placeholder-card placeholder-card--static">학습 콘텐츠를 준비하고 있습니다.</section>;
   }
 
-  const prev = docs[index - 1];
-  const next = docs[index + 1];
-
   return (
     <div className="docs">
       <nav className="docs-nav" aria-label="문서 목록">
@@ -60,25 +57,6 @@ function TopicDocs({ topicId, docSlug }) {
             </Suspense>
           )}
         </article>
-
-        {current && (prev || next) && (
-          <nav className="pager" aria-label="문서 이동">
-            {prev ? (
-              <Link to={docPath(topicId, prev.slug)} className="pager__link">
-                <small>이전 문서</small>
-                {prev.title}
-              </Link>
-            ) : (
-              <span />
-            )}
-            {next && (
-              <Link to={docPath(topicId, next.slug)} className="pager__link pager__link--next">
-                <small>다음 문서</small>
-                {next.title}
-              </Link>
-            )}
-          </nav>
-        )}
       </div>
 
       <aside className="docs-toc-col">
@@ -127,15 +105,10 @@ function TopicPage() {
         ) : (
           <span />
         )}
-        {next ? (
+        {next && (
           <Link to={topicPath(next.id)} className="pager__link pager__link--next">
             <small>다음 항목</small>
             {next.title}
-          </Link>
-        ) : (
-          <Link to={labPath} className="pager__link pager__link--next pager__link--lab">
-            <small>마지막 단계</small>
-            실습하러 가기 (터미널 · Wireshark)
           </Link>
         )}
       </nav>
