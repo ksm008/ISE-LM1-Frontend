@@ -32,7 +32,7 @@
     - eBPF 모니터링 로그 패널은 현재 비활성화되어 있습니다 (`src/pages/TerminalLabPage.jsx` 주석 참고).
   - 웹 취약점 실습: SQL 인젝션(Form, Union, Stored Procedure, Mass / Error-based, Blind), XSS(Stored, Reflected, DOM based), CSRF, SSRF, 운영체제 명령어 실행, 파일 업로드·다운로드, 경로 추적, 파일 삽입, URL/파라미터 변조, 불충분한 세션 관리, 정보누출 카테고리
     - **SQL 인젝션 실습**(Form, Union, Stored Procedure, Error-based): 브라우저 안 SQLite(sql.js, WASM)로 만든 실습용 쇼핑몰 DB 에 취약한 로그인 폼·게시판 검색을 흉내 냅니다. 서버로 보내지 않고, 새로고침하면 처음 상태입니다.
-      - 왼쪽은 취약한 웹 페이지(가짜 브라우저 창, SQL 오류를 그대로 보여 줌), 오른쪽은 서버가 실행한 SQL(사용자 입력 부분 강조)과 PHP 코드.
+      - 왼쪽은 취약한 웹 페이지(가짜 브라우저 창, SQL 오류를 그대로 보여 줌), 오른쪽은 서버가 실행한 SQL(사용자 입력 부분 강조)과 서버 코드(**PHP / Java 탭**: Java 는 JDBC `Statement` 문자열 연결 vs `PreparedStatement`·`CallableStatement`, MyBatis `#{}`/`${}` 주석, 고른 언어는 브라우저에 기억).
       - 미션(힌트·예시 입력): Form 은 오류 확인 → 인증 우회 → 관리자 로그인, Union 은 오류 확인 → 컬럼 수 → DB 정보 → 테이블 → 컬럼 → 관리자 비밀번호, Stored Procedure 는 프로시저 안 동적 SQL 의 오류 확인 → 조건 우회, Error-based 는 오류 노출 → `extractvalue()` 오류로 DB 버전 출력. "보안 코딩 적용"을 켜면 Prepared Statement(바인딩 값 표시)로 같은 공격이 막히는지 확인합니다.
       - MySQL 흐름을 따라 할 수 있게 `information_schema`(tables, columns, schemata)와 `database()`, `version()`, `user()`, `extractvalue()` 를 흉내 냅니다. `#` 주석은 안 되고 `--` 를 씁니다(오류에 안내). 한 번에 한 문장만 실행합니다(`;` 로 이어 붙인 문장 거부).
     - 나머지 항목은 준비 중
@@ -157,6 +157,7 @@ src/
 │       ├── unionLab.js       # 게시판 검색 SQL·UNION 판정·미션
 │       ├── spLab.js          # 저장 프로시저 안 동적 SQL·미션
 │       ├── errorLab.js       # 게시글 보기(숫자 파라미터)·오류 노출·미션
+│       ├── serverCode.js     # 실습별 서버 코드 예시 (PHP / Java, 취약·안전)
 │       ├── sqlJs.js          # sql.js(WASM) 불러오기
 │       ├── useSqliLab.js     # DB 준비·미션 진행 훅
 │       ├── SqliLabParts.jsx  # 가짜 브라우저 창, SQL 기록, 미션 목록, 서버 코드, 전체 틀

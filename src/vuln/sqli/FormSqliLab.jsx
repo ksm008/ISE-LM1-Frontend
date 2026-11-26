@@ -2,32 +2,9 @@ import { useState } from 'react';
 import { FORM_MISSIONS, LOGIN_URL, attemptLogin } from './formLab.js';
 import { LabBrowser, SqliLabLayout } from './SqliLabParts.jsx';
 import { useMissions, useShopDb } from './useSqliLab.js';
+import { SERVER_CODE } from './serverCode.js';
 import './SqliLab.css';
 
-const VULNERABLE_CODE = `<?php
-$id = $_POST['username'];
-$pw = $_POST['password'];
-
-// 입력값을 SQL 문자열에 그대로 이어 붙인다 (취약)
-$sql = "SELECT id, username, name, role FROM members
-        WHERE username = '$id' AND password = '$pw'";
-$result = mysqli_query($conn, $sql);
-
-if ($row = mysqli_fetch_assoc($result)) {   // 첫 번째 행으로 로그인
-    $_SESSION['user'] = $row['username'];
-}`;
-
-const SAFE_CODE = `<?php
-$id = $_POST['username'];
-$pw = $_POST['password'];
-
-// SQL 구조는 고정하고, 입력값은 값으로만 전달한다
-$stmt = mysqli_prepare($conn, "SELECT id, username, name, role FROM members
-                               WHERE username = ? AND password = ?");
-mysqli_stmt_bind_param($stmt, "ss", $id, $pw);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-// 실제 서비스: 비밀번호는 password_hash() 로 저장하고 password_verify() 로 비교`;
 
 function FormSqliLab() {
   const dbState = useShopDb();
@@ -117,7 +94,7 @@ function FormSqliLab() {
       safe={safe}
       onSafeChange={setSafe}
       onReset={reset}
-      code={{ vulnerable: VULNERABLE_CODE, safe: SAFE_CODE }}
+      code={SERVER_CODE['form']}
       notes={<FormNotes />}
     />
   );
@@ -133,7 +110,9 @@ function FormNotes() {
           가 나머지(비밀번호 검사)를 주석으로 만든다.
         </li>
         <li>
-          <b>대응</b>: Prepared Statement(바인딩), 입력값 검증(허용 문자 제한), 오류 메시지 숨김, DB 계정 최소 권한, 비밀번호 해시 저장.
+          <b>대응</b>: Prepared Statement(바인딩), 입력값 검증(허용 문자 제한), 오류 메시지 숨김, DB 계정 최소 권한, 비밀번호 해시 저장. Java 는{' '}
+          <code>Statement</code> 에 문자열을 이어 붙이지 말고 <code>PreparedStatement</code> 의 <code>?</code> 에 <code>setString()</code> 으로 바인딩하고, MyBatis 는{' '}
+          <code>{'${}'}</code> 대신 <code>{'#{}'}</code> 를 쓴다.
         </li>
         <li>
           <b>참고</b>: MySQL 의 <code>-- </code> 주석은 뒤에 공백이 있어야 하고 <code>#</code> 도 쓸 수 있다. 이 실습 DB(SQLite)는 <code>--</code> 만

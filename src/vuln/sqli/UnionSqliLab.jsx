@@ -2,31 +2,9 @@ import { useMemo, useState } from 'react';
 import { SEARCH_URL, UNION_MISSIONS, search, searchUrl } from './unionLab.js';
 import { LabBrowser, SqliLabLayout } from './SqliLabParts.jsx';
 import { useMissions, useShopDb } from './useSqliLab.js';
+import { SERVER_CODE } from './serverCode.js';
 import './SqliLab.css';
 
-const VULNERABLE_CODE = `<?php
-$q = $_GET['q'];
-
-// 검색어를 LIKE 조건에 그대로 이어 붙인다 (취약)
-$sql = "SELECT id, title, writer, created FROM posts
-        WHERE title LIKE '%$q%' ORDER BY id DESC";
-$result = mysqli_query($conn, $sql);
-
-while ($row = mysqli_fetch_row($result)) {
-    // 결과 4개 컬럼을 번호·제목·작성자·작성일 칸에 그대로 출력
-    echo "<tr><td>$row[0]</td><td>$row[1]</td><td>$row[2]</td><td>$row[3]</td></tr>";
-}`;
-
-const SAFE_CODE = `<?php
-$q = $_GET['q'];
-
-// SQL 구조는 고정하고, 검색어는 값으로만 전달한다
-$stmt = mysqli_prepare($conn, "SELECT id, title, writer, created FROM posts
-                               WHERE title LIKE ? ORDER BY id DESC");
-$like = "%" . $q . "%";
-mysqli_stmt_bind_param($stmt, "s", $like);
-mysqli_stmt_execute($stmt);
-// 출력할 때는 htmlspecialchars() 로 이스케이프 (XSS 대응)`;
 
 function UnionSqliLab() {
   const dbState = useShopDb();
@@ -136,7 +114,7 @@ function UnionSqliLab() {
       safe={safe}
       onSafeChange={setSafe}
       onReset={reset}
-      code={{ vulnerable: VULNERABLE_CODE, safe: SAFE_CODE }}
+      code={SERVER_CODE['union']}
       notes={<UnionNotes />}
     />
   );

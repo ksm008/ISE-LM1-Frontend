@@ -2,31 +2,9 @@ import { useState } from 'react';
 import { SP_MISSIONS, SP_URL, findMember } from './spLab.js';
 import { LabBrowser, SqliLabLayout } from './SqliLabParts.jsx';
 import { useMissions, useShopDb } from './useSqliLab.js';
+import { SERVER_CODE } from './serverCode.js';
 import './SqliLab.css';
 
-const VULNERABLE_CODE = `-- 저장 프로시저 (MS-SQL 예)
-CREATE PROCEDURE sp_find_member @name NVARCHAR(50)
-AS
-BEGIN
-    -- 프로시저 안에서 입력값을 이어 붙여 동적 SQL 을 만든다 (취약)
-    DECLARE @sql NVARCHAR(500);
-    SET @sql = 'SELECT username, name, email FROM members WHERE name = '''
-               + @name + '''';
-    EXEC (@sql);
-END
-
--- 웹 애플리케이션: EXEC sp_find_member @name = ? (호출 자체는 바인딩해도 소용없음)`;
-
-const SAFE_CODE = `-- 방법 1: 동적 SQL 을 쓰지 않는다 (정적 SQL)
-CREATE PROCEDURE sp_find_member @name NVARCHAR(50)
-AS
-BEGIN
-    SELECT username, name, email FROM members WHERE name = @name;
-END
-
--- 방법 2: 동적 SQL 이 꼭 필요하면 sp_executesql 로 파라미터 바인딩
--- EXEC sp_executesql N'SELECT ... WHERE name = @n', N'@n NVARCHAR(50)', @n = @name;
--- 그리고 웹 계정에는 필요한 프로시저 실행 권한만 준다 (최소 권한)`;
 
 function SpSqliLab() {
   const dbState = useShopDb();
@@ -117,7 +95,7 @@ function SpSqliLab() {
       safe={safe}
       onSafeChange={setSafe}
       onReset={reset}
-      code={{ vulnerable: VULNERABLE_CODE, safe: SAFE_CODE }}
+      code={SERVER_CODE['stored-procedure']}
       notes={<SpNotes />}
     />
   );

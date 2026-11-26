@@ -445,11 +445,49 @@
 }
 
 /* 서버 코드 */
-.sqli-code__label {
+.sqli-code__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 10px;
   margin-bottom: 6px;
+}
+
+.sqli-code__label {
   color: var(--text-strong);
   font-size: 13px;
   font-weight: 600;
+}
+
+.sqli-code__tabs {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.sqli-code__tab {
+  padding: 3px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font: 600 12px var(--sans);
+  cursor: pointer;
+}
+
+.sqli-code__tab:hover {
+  color: var(--text-strong);
+}
+
+.sqli-code__tab--active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.sqli-code__tab--active:hover {
+  color: var(--on-accent);
 }
 
 .sqli-code pre {

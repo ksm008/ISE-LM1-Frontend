@@ -1,5 +1,7 @@
 // SQL 인젝션 실습 화면 공용 부품: 가짜 브라우저 창, 실행된 SQL 기록, 미션 목록, 서버 코드
 import { errorHint, MAX_ROWS } from './query.js';
+import { CODE_LANGS } from './serverCode.js';
+import { useCodeLang } from './useSqliLab.js';
 
 export function LabBrowser({ url, children }) {
   return (
@@ -138,12 +140,33 @@ export function SafeToggle({ safe, onChange }) {
   );
 }
 
-export function ServerCode({ vulnerable, safe, safeMode }) {
+/** 서버 코드 (언어 탭: PHP / Java). code = { php: {vulnerable, safe}, java: {...} } */
+export function ServerCode({ code, safeMode }) {
+  const [lang, setLang] = useCodeLang();
+  const current = code[lang] ?? code.php;
   return (
     <div className="sqli-code">
-      <div className="sqli-code__label">{safeMode ? '안전한 코드 (입력값을 자리표시자 ? 에 바인딩)' : '취약한 코드 (입력값을 SQL 문자열에 그대로 연결)'}</div>
+      <div className="sqli-code__head">
+        <span className="sqli-code__label">
+          {safeMode ? '안전한 코드 (입력값은 값으로만 전달)' : '취약한 코드 (입력값을 SQL 문자열에 그대로 연결)'}
+        </span>
+        <div className="sqli-code__tabs" role="tablist" aria-label="서버 코드 언어">
+          {CODE_LANGS.filter((l) => code[l.id]).map((l) => (
+            <button
+              key={l.id}
+              type="button"
+              role="tab"
+              aria-selected={lang === l.id}
+              className={`sqli-code__tab${lang === l.id ? ' sqli-code__tab--active' : ''}`}
+              onClick={() => setLang(l.id)}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+      </div>
       <pre>
-        <code>{safeMode ? safe : vulnerable}</code>
+        <code>{safeMode ? current.safe : current.vulnerable}</code>
       </pre>
     </div>
   );
@@ -179,7 +202,7 @@ export function SqliLabLayout({ dbState, browser, attempts, missions, missionSta
         <section className="sqli-panel" aria-label="서버">
           <h2 className="sqli-panel__title">서버에서 실행된 SQL</h2>
           <SqlLog attempts={attempts} />
-          <ServerCode {...code} safeMode={safe} />
+          <ServerCode code={code} safeMode={safe} />
         </section>
       </div>
 

@@ -48,3 +48,25 @@ export function useMissions(missions) {
   }, []);
   return { done, latest, record, reset };
 }
+
+const LANG_KEY = 'iselm1.sqli.codeLang';
+
+/** 서버 코드 언어 (PHP / Java). 이 브라우저에 기억해 실습을 옮겨도 유지 */
+export function useCodeLang() {
+  const [lang, setLangState] = useState(() => {
+    try {
+      return localStorage.getItem(LANG_KEY) || 'php';
+    } catch {
+      return 'php';
+    }
+  });
+  const setLang = useCallback((value) => {
+    setLangState(value);
+    try {
+      localStorage.setItem(LANG_KEY, value);
+    } catch {
+      // 저장 못 해도 화면 동작에는 문제없음
+    }
+  }, []);
+  return [lang, setLang];
+}

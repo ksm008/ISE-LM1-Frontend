@@ -2,34 +2,9 @@ import { useState } from 'react';
 import { ERROR_MISSIONS, VIEW_URL, viewPost, viewUrl } from './errorLab.js';
 import { LabBrowser, SqliLabLayout } from './SqliLabParts.jsx';
 import { useMissions, useShopDb } from './useSqliLab.js';
+import { SERVER_CODE } from './serverCode.js';
 import './SqliLab.css';
 
-const VULNERABLE_CODE = `<?php
-$id = $_GET['id'];
-
-// 숫자 파라미터라 따옴표 없이 이어 붙인다 (취약)
-$sql = "SELECT id, title, writer, created FROM posts WHERE id = $id";
-$result = mysqli_query($conn, $sql);
-
-if (!$result) {
-    // DB 오류를 그대로 화면에 출력한다 (정보 노출)
-    die("DB 오류: " . mysqli_error($conn));
-}`;
-
-const SAFE_CODE = `<?php
-$id = $_GET['id'];
-if (!ctype_digit($id)) { http_response_code(400); exit('잘못된 요청입니다.'); }  // 입력 검증
-
-$stmt = mysqli_prepare($conn, "SELECT id, title, writer, created FROM posts WHERE id = ?");
-mysqli_stmt_bind_param($stmt, "i", $id);
-
-try {
-    mysqli_stmt_execute($stmt);
-} catch (mysqli_sql_exception $e) {
-    error_log($e->getMessage());               // 자세한 내용은 서버 로그에만
-    exit('요청을 처리하지 못했습니다.');          // 사용자에게는 일반 안내
-}
-// php.ini: display_errors = Off`;
 
 function ErrorSqliLab() {
   const dbState = useShopDb();
@@ -99,7 +74,7 @@ function ErrorSqliLab() {
       safe={safe}
       onSafeChange={setSafe}
       onReset={reset}
-      code={{ vulnerable: VULNERABLE_CODE, safe: SAFE_CODE }}
+      code={SERVER_CODE['error-based']}
       notes={<ErrorNotes />}
     />
   );
