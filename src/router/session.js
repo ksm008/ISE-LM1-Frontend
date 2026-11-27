@@ -114,7 +114,7 @@ export class RouterSession {
     this.loginUser = null;
     this.print(
       '',
-      'ISE·LM1 라우터 시뮬레이터 (IOS 스타일 명령 학습용)',
+      '일단고 라우터 시뮬레이터 (IOS 스타일 명령 학습용)',
       this.startup ? '저장된 설정(startup-config)을 불러왔습니다.' : '저장된 설정이 없어 기본 설정으로 시작합니다.',
       '',
       '',

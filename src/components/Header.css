@@ -185,14 +185,11 @@
   }
 }
 
-/* 아주 좁은 화면(320~420px 휴대폰): 이름을 줄이고 메뉴 간격을 좁혀 한 줄에 들어가게 한다 */
+/* 아주 좁은 화면(320~420px 휴대폰): 메뉴 간격을 좁혀 한 줄에 들어가게 한다 */
 @media (max-width: 420px) {
   .site-header__inner {
     padding: 0 12px;
     gap: 6px;
-  }
-  .site-header__brand-sub {
-    display: none;
   }
   .site-nav {
     gap: 2px;

@@ -24,7 +24,7 @@ function showVersion(ctx) {
   const s = ctx.session;
   const up = Math.floor((Date.now() - s.bootedAt) / 60000);
   ctx.out(
-    'ISE·LM1 라우터 시뮬레이터 (IOS 스타일 명령 학습용), Version 15.4',
+    '일단고 라우터 시뮬레이터 (IOS 스타일 명령 학습용), Version 15.4',
     '',
     `${ctx.d.hostname} uptime is ${up} minute${up === 1 ? '' : 's'}`,
     'System image file is "simulator:router-15.4"',

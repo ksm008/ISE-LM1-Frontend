@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Impeccable 스킬 설치 파일 (npx impeccable install 로 다시 설치)
+.claude/

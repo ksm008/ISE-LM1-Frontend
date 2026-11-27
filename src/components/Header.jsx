@@ -66,7 +66,7 @@ function Header() {
       <header className="site-header">
         <div className="site-header__inner">
           <Link to="/" className="site-header__brand">
-            ISE·LM1<span className="site-header__brand-sub"> 스터디</span>
+            일단고
           </Link>
 
           <nav className="site-nav" aria-label="자격증 메뉴">
