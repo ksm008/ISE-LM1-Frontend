@@ -108,7 +108,6 @@ function Header() {
                 {labs.map((lab) => (
                   <li key={lab.id} role="none">
                     <NavLink to={lab.path} role="menuitem" className="dropdown__link dropdown__link--lab">
-                      <span className="dropdown__num" aria-hidden="true">{lab.icon}</span>
                       {lab.title}
                     </NavLink>
                   </li>

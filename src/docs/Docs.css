@@ -64,8 +64,8 @@
 }
 
 .docs-nav__num {
-  font-family: var(--mono);
-  opacity: 0.7;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .docs-main {
@@ -305,8 +305,10 @@
 /* ---------- Markdown 본문 ---------- */
 .markdown-body {
   color: var(--text-strong);
-  font-size: 15.5px;
-  line-height: 1.75;
+  font-size: 16px;
+  line-height: 1.8;
+  /* 한국어는 낱말 중간에서 줄을 바꾸지 않는다. 긴 영문·주소만 필요할 때 끊는다 */
+  word-break: keep-all;
   overflow-wrap: break-word;
 }
 

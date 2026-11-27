@@ -16,13 +16,14 @@ function LabHubPage() {
         <p>학습한 내용을 실제 환경에서 확인해 보세요. 원하는 실습을 선택하면 됩니다.</p>
       </header>
 
-      <ul className="topic-grid lab-grid">
+      <ul className="index-list index-list--plain">
         {labs.map((lab) => (
           <li key={lab.id}>
-            <Link to={lab.path} className="topic-card topic-card--lab">
-              <span className="topic-card__num">{lab.icon}</span>
-              <span className="topic-card__title">{lab.title}</span>
-              <span className="topic-card__summary">{lab.summary}</span>
+            <Link to={lab.path} className="index-row">
+              <span className="index-row__body">
+                <span className="index-row__title">{lab.title}</span>
+                <span className="index-row__summary">{lab.summary}</span>
+              </span>
             </Link>
           </li>
         ))}

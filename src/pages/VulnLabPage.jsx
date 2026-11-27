@@ -22,10 +22,9 @@ function VulnLabPage() {
       </header>
 
       <ul className="topic-grid">
-        {vulnCategories.map((vuln, index) => (
+        {vulnCategories.map((vuln) => (
           <li key={vuln.id}>
             <Link to={vulnPath(vuln.id)} className="topic-card">
-              <span className="topic-card__num">{String(index + 1).padStart(2, '0')}</span>
               <span className="topic-card__title">{vuln.title}</span>
               <span className="topic-card__summary">{vuln.summary}</span>
               {vuln.groups && (

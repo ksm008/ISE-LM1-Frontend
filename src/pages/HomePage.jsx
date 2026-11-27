@@ -37,22 +37,17 @@ function HomePage() {
       )}
 
       <section className="hero">
-        <p className="hero__eyebrow">자격증 학습 사이트</p>
-        <h1 className="hero__title">
-          정보보안기사 · 리눅스마스터 1급
-          <br />
-          함께 준비하는 학습 공간
-        </h1>
+        <h1 className="hero__title">정보보안기사 · 리눅스마스터 1급 학습 노트</h1>
         <p className="hero__desc">
-          정보보안기사와 리눅스마스터 1급 시험 범위를 항목별로 정리하고,
-          실제 리눅스 컨테이너 터미널에서 직접 명령어를 실습할 수 있습니다.
+          시험 범위를 항목별로 직접 정리한 문서를 읽고, 같은 화면에서 실제 리눅스 컨테이너 터미널과
+          실습 도구로 확인합니다.
         </p>
         <div className="hero__actions">
           <Link to={topicPath(isecTopics[0].id)} className="btn btn--primary">
-            정보보안기사 학습 시작
+            첫 문서부터 읽기
           </Link>
           <Link to={labPath} className="btn">
-            실습 바로가기
+            실습 목록
           </Link>
         </div>
       </section>
@@ -98,22 +93,24 @@ function GuestOverview() {
   );
 }
 
-// 로그인 후: 학습 항목 5개 한 줄, 실습 4개 한 줄
+// 로그인 후: 문서 차례처럼 한 줄씩. 학습 항목 번호는 읽는 순서(헤더 메뉴·항목 페이지와 같음)라 남긴다
 function MemberContent() {
   return (
     <>
       <section className="section">
         <div className="section__head">
-          <h2>정보보안기사 학습</h2>
+          <h2>정보보안기사</h2>
           <p>다섯 개 영역의 학습 문서를 차례로 읽어 보세요.</p>
         </div>
-        <ol className="home-grid home-grid--topics">
+        <ol className="index-list">
           {isecTopics.map((topic, idx) => (
             <li key={topic.id}>
-              <Link to={topicPath(topic.id)} className="topic-card">
-                <span className="topic-card__num">{String(idx + 1).padStart(2, '0')}</span>
-                <span className="topic-card__title">{topic.title}</span>
-                <span className="topic-card__summary">{topic.summary}</span>
+              <Link to={topicPath(topic.id)} className="index-row">
+                <span className="index-row__num">{idx + 1}</span>
+                <span className="index-row__body">
+                  <span className="index-row__title">{topic.title}</span>
+                  <span className="index-row__summary">{topic.summary}</span>
+                </span>
               </Link>
             </li>
           ))}
@@ -123,15 +120,16 @@ function MemberContent() {
       <section className="section">
         <div className="section__head">
           <h2>실습</h2>
-          <p>터미널, 패킷 분석, 라우터 설정, 웹 취약점을 직접 다뤄 보세요.</p>
+          <p>문서에서 읽은 내용을 브라우저에서 직접 해 봅니다.</p>
         </div>
-        <ul className="home-grid home-grid--labs">
+        <ul className="index-list index-list--plain">
           {labs.map((lab) => (
             <li key={lab.id}>
-              <Link to={lab.path} className="topic-card topic-card--lab">
-                <span className="topic-card__num">{lab.icon}</span>
-                <span className="topic-card__title">{lab.title}</span>
-                <span className="topic-card__summary">{lab.summary}</span>
+              <Link to={lab.path} className="index-row">
+                <span className="index-row__body">
+                  <span className="index-row__title">{lab.title}</span>
+                  <span className="index-row__summary">{lab.summary}</span>
+                </span>
               </Link>
             </li>
           ))}
@@ -141,11 +139,17 @@ function MemberContent() {
       <section className="section">
         <div className="section__head">
           <h2>리눅스마스터 1급</h2>
-          <p>주요 항목을 준비하고 있습니다.</p>
         </div>
-        <Link to="/linux" className="placeholder-card">
-          리눅스마스터 1급 페이지로 이동 →
-        </Link>
+        <ul className="index-list index-list--plain">
+          <li>
+            <Link to="/linux" className="index-row">
+              <span className="index-row__body">
+                <span className="index-row__title">학습 자료 준비 중</span>
+                <span className="index-row__summary">주요 항목을 정리하고 있습니다.</span>
+              </span>
+            </Link>
+          </li>
+        </ul>
       </section>
     </>
   );

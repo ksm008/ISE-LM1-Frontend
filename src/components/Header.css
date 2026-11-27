@@ -17,8 +17,9 @@
 }
 
 .site-header__brand {
-  font-weight: 700;
-  font-size: 17px;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
   color: var(--text-strong);
   text-decoration: none;
   white-space: nowrap;
@@ -43,7 +44,7 @@
   gap: 4px;
   padding: 8px 12px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: none;
   font: inherit;
   font-size: 15px;
@@ -121,15 +122,11 @@
 
 .dropdown__num {
   flex: none;
-  width: 22px;
-  height: 22px;
-  display: inline-grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 700;
+  width: 1.25rem;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 .dropdown__divider {
@@ -154,12 +151,9 @@
   color: var(--accent);
 }
 
-.dropdown__link--lab .dropdown__num {
-  border-radius: 4px;
-  background: #111;
-  color: #00ff88;
-  font-family: var(--mono);
-  font-size: 10px;
+/* 실습 항목은 번호가 없으므로 학습 항목 제목과 시작선을 맞춘다 (번호 폭 + 간격) */
+.dropdown__link--lab {
+  padding-left: calc(10px + 1.25rem + 10px);
 }
 
 @media (max-width: 600px) {
@@ -273,8 +267,8 @@
 }
 
 .site-auth__badge--warn {
-  background: rgba(234, 134, 0, 0.15);
-  color: #b06000;
+  background: rgba(176, 96, 0, 0.12);
+  color: #9a5400;
 }
 
 .site-auth__btn {

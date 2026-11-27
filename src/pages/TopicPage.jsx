@@ -89,7 +89,6 @@ function TopicPage() {
       </nav>
 
       <header className="topic-header">
-        <span className="topic-header__num">{String(index + 1).padStart(2, '0')}</span>
         <h1>{topic.title}</h1>
         <p>{topic.summary}</p>
       </header>
