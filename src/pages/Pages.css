@@ -355,8 +355,9 @@ a.placeholder-card:hover {
 }
 
 /* ---------- 웹 취약점 세부 실습 (VulnPracticePage) ---------- */
+/* 실습 화면: 넓은 화면에서도 헤더와 같은 폭·시작선에 맞춘다 */
 .page--wide {
-  max-width: 1320px;
+  max-width: var(--content-width);
 }
 
 .topic-header--compact {
